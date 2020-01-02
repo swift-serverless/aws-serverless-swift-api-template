@@ -1,0 +1,141 @@
+service: swift-sprinter-rest-api-swift
+
+package:
+    individually: true
+
+provider:
+    name: aws
+    runtime: provided
+    stage: ${opt:stage, 'dev'}
+    region: ${opt:region, 'us-east-1'}
+    profile: ascuderi.bjss
+    environment:
+        PRODUCTS_TABLE_NAME: "${self:custom.productsTableName}"
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+          Resource: "*"
+        - Effect: Allow
+          Action:
+              - dynamodb:UpdateItem
+              - dynamodb:PutItem
+              - dynamodb:GetItem
+              - dynamodb:DeleteItem
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:DescribeTable
+          Resource:
+              - { Fn::GetAtt: [ProductsTable, Arn] }
+
+layers:
+    swift-lambda-runtime:
+        path: ./build/swift-lambda-runtime-5-1-3
+        name: ${self:provider.stage}-swift-lambda-runtime
+        description: AWS Lambda Custom Runtime for Swift 5.1.3
+
+custom:
+    productsTableName: swift-sprinter-products-table-${self:provider.stage}
+
+functions:
+    createProduct:
+        handler: build/Products.create
+        package:
+            individually: true
+            exclude:
+                - "**/*"
+            include:
+                - build/Products
+        memorySize: 256
+        layers:
+           - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
+        description: "[${self:provider.stage}] Create Product"
+        events:
+            - http:
+                  path: products
+                  method: post
+                  cors: true
+    readProduct:
+        handler: build/Products.read
+        package:
+            individually: true
+            exclude:
+                - "**/*"
+            include:
+                - build/Products
+        memorySize: 256
+        layers:
+            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
+        description: "[${self:provider.stage}] Get Product"
+        events:
+            - http:
+                    path: products/{sku}
+                    method: get
+                    cors: true
+    updateProduct:
+        handler: build/Products.update
+        package:
+            individually: true
+            exclude:
+                - "**/*"
+            include:
+                - build/Products
+        memorySize: 256
+        layers:
+            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
+        description: "[${self:provider.stage}] Update Product"
+        events:
+            - http:
+                  path: products
+                  method: put
+                  cors: true
+    deleteProduct:
+        handler: build/Products.delete
+        package:
+            individually: true
+            exclude:
+                - "**/*"
+            include:
+                - build/Products
+        memorySize: 256
+        layers:
+            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
+        description: "[${self:provider.stage}] Delete Product"
+        events:
+            - http:
+                  path: products/{sku}
+                  method: delete
+                  cors: true
+    listProducts:
+        handler: build/Products.list
+        package:
+            individually: true
+            exclude:
+                - "**/*"
+            include:
+                - build/Products
+        memorySize: 256
+        layers:
+            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
+        description: "[${self:provider.stage}] List Products"
+        events:
+            - http:
+                  path: products
+                  method: get
+                  cors: true
+
+resources:
+    Resources:
+        ProductsTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${self:custom.productsTableName}
+                AttributeDefinitions:
+                    - AttributeName: sku
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: sku
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST

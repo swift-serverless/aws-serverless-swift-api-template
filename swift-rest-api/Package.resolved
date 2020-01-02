@@ -1,0 +1,115 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "async-http-client",
+        "repositoryURL": "https://github.com/swift-server/async-http-client.git",
+        "state": {
+          "branch": null,
+          "revision": "51dc885a30ca704b02fa803099b0a9b5b38067b6",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "LambdaSwiftSprinter",
+        "repositoryURL": "https://github.com/swift-sprinter/aws-lambda-swift-sprinter-core",
+        "state": {
+          "branch": null,
+          "revision": "3afe37ba73f50cf5735c82a9b389d981cefe483d",
+          "version": "1.0.0-alpha3"
+        }
+      },
+      {
+        "package": "LambdaSwiftSprinterNioPlugin",
+        "repositoryURL": "https://github.com/swift-sprinter/aws-lambda-swift-sprinter-nio-plugin",
+        "state": {
+          "branch": null,
+          "revision": "6b11518ec8e8c4f7eb968120d17f026f9449e2c9",
+          "version": "1.0.0-alpha.3"
+        }
+      },
+      {
+        "package": "AWSSDKSwift",
+        "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "22c57f8ec403a28d89dccf5450b928998f82fdc6",
+          "version": "4.0.0"
+        }
+      },
+      {
+        "package": "AWSSDKSwiftCore",
+        "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift-core.git",
+        "state": {
+          "branch": null,
+          "revision": "29d059a323c079c731bca969909321142034a036",
+          "version": "4.0.0"
+        }
+      },
+      {
+        "package": "HypertextApplicationLanguage",
+        "repositoryURL": "https://github.com/swift-aws/HypertextApplicationLanguage.git",
+        "state": {
+          "branch": null,
+          "revision": "aa2c9141d491682f17b2310aed17b9adfc006256",
+          "version": "1.1.1"
+        }
+      },
+      {
+        "package": "INIParser",
+        "repositoryURL": "https://github.com/swift-aws/Perfect-INIParser.git",
+        "state": {
+          "branch": null,
+          "revision": "42de0efc7a01105e19b80d533d3d282a98277f6c",
+          "version": "3.0.3"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
+          "version": "1.2.0"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "ff01888051cd7efceb1bf8319c1dd3986c4bf6fc",
+          "version": "2.10.1"
+        }
+      },
+      {
+        "package": "swift-nio-extras",
+        "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
+        "state": {
+          "branch": null,
+          "revision": "53808818c2015c45247cad74dc05c7a032c96a2f",
+          "version": "1.3.2"
+        }
+      },
+      {
+        "package": "swift-nio-ssl",
+        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
+        "state": {
+          "branch": null,
+          "revision": "ccf96bbe65ecc7c1558ab0dba7ffabdea5c1d31f",
+          "version": "2.4.4"
+        }
+      },
+      {
+        "package": "swift-nio-transport-services",
+        "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
+        "state": {
+          "branch": null,
+          "revision": "80b11dc13261e0e52f75ea3a0b2e04f24e925019",
+          "version": "1.2.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

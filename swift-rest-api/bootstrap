@@ -1,0 +1,3 @@
+#!/bin/sh
+EXECUTABLE=$LAMBDA_TASK_ROOT/"$(echo $_HANDLER | cut -d. -f1)"
+/opt/swift-shared-libs/ld-linux-x86-64.so.2 --library-path /opt/swift-shared-libs/lib $EXECUTABLE
