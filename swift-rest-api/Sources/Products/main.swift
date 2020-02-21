@@ -46,8 +46,9 @@ let service = ProductService(
     tableName: tableName
 )
 
-let create: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult> = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
-   
+typealias APIGatewaySyncLambda = SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult>
+
+let create: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
     let product: Product = try event.object()
     let future = service.createItem(product: product).map { (item) -> APIGatewayProxyResult in
         return APIGatewayProxyResult(object: product, statusCode: 201)
@@ -55,7 +56,7 @@ let create: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResu
     return future
 }
 
-let read: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult> = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
+let read: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
     
     guard let sku = event.pathParameters?["sku"] else {
         throw APIError.invalidRequest
@@ -68,7 +69,7 @@ let read: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult
     return future
 }
 
-let update: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult> = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
+let update: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
     
     let product: Product = try event.object()
     let future = service.updateItem(product: product).map { (data) -> APIGatewayProxyResult in
@@ -77,7 +78,7 @@ let update: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResu
     return future
 }
 
-let delete: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult> = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
+let delete: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
     
     guard let sku = event.pathParameters?["sku"] else {
         throw APIError.invalidRequest
@@ -90,7 +91,7 @@ let delete: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResu
     return future
 }
 
-let list: SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult> = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
+let list: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
     let future = service.listItems().flatMapThrowing { data -> [Product] in
         let products: [Product]? = try data.items?.compactMap { (item) -> Product in
             return try Product(dictionary: item)

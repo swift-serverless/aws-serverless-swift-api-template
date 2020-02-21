@@ -13,43 +13,12 @@
 //    limitations under the License.
 
 import Foundation
-#if canImport(FoundationNetworking)
-    import FoundationNetworking
-#endif
-import DynamoDB
 
 public struct Product: Codable {
     public let sku: String
     public let name: String
     public let description: String
-    public let createdAt: String?
-    public let updatedAt: String?
+    public var createdAt: String?
+    public var updatedAt: String?
 }
 
-public extension Product {
-    var dynamoDictionary: [String : DynamoDB.AttributeValue] {
-        var dictionary = ["sku": DynamoDB.AttributeValue(s:sku),
-                          "name": DynamoDB.AttributeValue(s:name),
-                          "description": DynamoDB.AttributeValue(s:description)]
-        if let createdAt = createdAt {
-            dictionary["createdAt"] = DynamoDB.AttributeValue(s:createdAt)
-        }
-        if let updatedAt = updatedAt {
-            dictionary["updatedAt"] = DynamoDB.AttributeValue(s:updatedAt)
-        }
-        return dictionary
-    }
-    
-    init(dictionary: [String: DynamoDB.AttributeValue]) throws {
-        guard let name = dictionary["name"]?.s,
-            let sku = dictionary["sku"]?.s,
-            let description = dictionary["description"]?.s else {
-                throw APIError.invalidItem
-        }
-        self.name = name
-        self.sku = sku
-        self.description = description
-        self.createdAt = dictionary["createdAt"]?.s
-        self.updatedAt = dictionary["updatedAt"]?.s
-    }
-}

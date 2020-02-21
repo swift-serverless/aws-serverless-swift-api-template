@@ -14,13 +14,14 @@
 
 # Use this tag to build a customized local image
 
-SWIFT_VERSION?=5.1.3
-LAYER_VERSION?=5-1-3
+SWIFT_VERSION?=5.1.4
+LAYER_VERSION?=5-1-4
 
 DOCKER_TAG=nio-swift:$(SWIFT_VERSION)
 SWIFT_DOCKER_IMAGE=$(DOCKER_TAG)
 SWIFT_LAMBDA_LIBRARY=nio-swift-lambda-runtime-$(LAYER_VERSION)
 SWIFT_CONFIGURATION=release
+SWIFT_LAYER_PATH=swift-lambda-runtime-$(LAYER_VERSION)
 
 # Configuration
 
@@ -53,9 +54,8 @@ build_lambda:
 			$(SWIFT_DOCKER_IMAGE) \
 			/bin/bash -c "swift build --configuration $(SWIFT_CONFIGURATION)"
 
-
 cp_to_build:
-	cp .build/x86_64-unknown-linux/release/Products ../build/Products
+	cp .build/x86_64-unknown-linux/$(SWIFT_CONFIGURATION)/Products ../build/Products
 
 create_build_directory:
 	if [ ! -d "$(LAMBDA_BUILD_PATH)" ]; then mkdir -p $(LAMBDA_BUILD_PATH); fi
@@ -80,3 +80,9 @@ package_layer: create_build_directory
 			$(SWIFT_DOCKER_IMAGE) \
 			cp -t $(SHARED_LIBS_FOLDER)/lib $(SHARED_LIBRARIES)
 	zip -r $(LAYER_BUILD_PATH)/$(LAYER_ZIP) bootstrap $(SHARED_LIBS_FOLDER)
+
+unzip_package_to_build:
+	if [ ! -d "../build/$(SWIFT_LAYER_PATH)" ]; then mkdir -p ../build/$(SWIFT_LAYER_PATH); fi
+	cp $(LAYER_BUILD_PATH)/$(LAYER_ZIP) ../build/$(SWIFT_LAYER_PATH)/$(LAYER_ZIP)
+	unzip ../build/$(SWIFT_LAYER_PATH)/$(LAYER_ZIP) -d ../build/$(SWIFT_LAYER_PATH)
+	rm ../build/$(SWIFT_LAYER_PATH)/$(LAYER_ZIP)

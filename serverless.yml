@@ -8,7 +8,6 @@ provider:
     runtime: provided
     stage: ${opt:stage, 'dev'}
     region: ${opt:region, 'us-east-1'}
-    profile: ascuderi.bjss
     environment:
         PRODUCTS_TABLE_NAME: "${self:custom.productsTableName}"
     iamRoleStatements:
@@ -32,9 +31,9 @@ provider:
 
 layers:
     swift-lambda-runtime:
-        path: ./build/swift-lambda-runtime-5-1-3
+        path: ./build/swift-lambda-runtime-5-1-4
         name: ${self:provider.stage}-swift-lambda-runtime
-        description: AWS Lambda Custom Runtime for Swift 5.1.3
+        description: AWS Lambda Custom Runtime for Swift 5.1.4
 
 custom:
     productsTableName: swift-sprinter-products-table-${self:provider.stage}
