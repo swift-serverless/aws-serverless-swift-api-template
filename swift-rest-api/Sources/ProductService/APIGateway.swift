@@ -15,6 +15,8 @@
 import Foundation
 import DynamoDB
 import NIO
+import LambdaSwiftSprinter
+import LambdaSwiftSprinterNioPlugin
 
 public struct APIGatewayEventIdentity: Codable {
     public let accessKey: String?
@@ -122,6 +124,7 @@ public struct APIGatewayProxyResult: Codable {
         }
         self.init(
             statusCode: statusCode,
+            headers: ["Content-Type": "application/json"],
             body: outBody
         )
     }

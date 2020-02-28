@@ -6,6 +6,7 @@ Install Serverless Framework
 curl -o- -L https://slss.io/install | bash
 ```
 
+Export the binary PATH
 ```
 export PATH="$HOME/.serverless/bin:$PATH"
 ```

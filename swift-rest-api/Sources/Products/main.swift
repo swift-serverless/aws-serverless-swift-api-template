@@ -14,7 +14,7 @@
 
 import Foundation
 #if canImport(FoundationNetworking)
-    import FoundationNetworking
+import FoundationNetworking
 #endif
 import LambdaSwiftSprinter
 import LambdaSwiftSprinterNioPlugin
@@ -24,84 +24,98 @@ import NIOHTTP1
 import ProductService
 import Logging
 
-let logger = Logger(label: "AWS.Lambda.ProductSerivce")
-
-//let lambda: AsyncDictionaryLambda = { (event, context, completion) in
-//
-//    let result:[String: Any] = ["isBase64Encoded": false,
-//                                "statusCode": 200,
-//                                "headers": ["Content-Type": "application/json"],
-//                                "body": "\(event)"]
-//    completion(.success(result))
-//}
+let logger = Logger(label: "AWS.Lambda.ProductService")
 
 guard let tableName = ProcessInfo.processInfo.environment["PRODUCTS_TABLE_NAME"] else {
     logger.error("\(String(describing: APIError.tableNameNotFound))")
     throw APIError.tableNameNotFound
 }
 
-let db = DynamoDB(region: .useast1)
+let region: Region
+
+if let awsRegion = ProcessInfo.processInfo.environment["AWS_REGION"],
+    let value = Region(rawValue: awsRegion) {
+    region = value
+    logger.info("AWS_REGION: \(region)")
+} else {
+    //Default configuration
+    region = .useast1
+    logger.info("AWS_REGION: us-east-1")
+}
+
+let db = DynamoDB(region: region)
+
 let service = ProductService(
     db: db,
     tableName: tableName
 )
 
-typealias APIGatewaySyncLambda = SyncCodableNIOLambda<APIGatewayProxySimpleEvent, APIGatewayProxyResult>
-
-let create: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
+let createHandler: (APIGatewayProxySimpleEvent, Context) throws -> EventLoopFuture<Product> = { (event,context) throws -> EventLoopFuture<Product> in
     let product: Product = try event.object()
-    let future = service.createItem(product: product).map { (item) -> APIGatewayProxyResult in
-        return APIGatewayProxyResult(object: product, statusCode: 201)
+    let future = service.createItem(product: product)
+    .flatMapThrowing { item -> Product in
+        return product
     }
     return future
 }
 
-let read: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
-    
+let create = APIGatewayProxyLambda<Product>(config: responseCreated, handler: createHandler)
+
+let readHandler: (APIGatewayProxySimpleEvent, Context) throws -> EventLoopFuture<Product> = { (event,context) throws -> EventLoopFuture<Product> in
     guard let sku = event.pathParameters?["sku"] else {
         throw APIError.invalidRequest
     }
-
-    let future = service.readItem(key: sku).flatMapThrowing { data -> APIGatewayProxyResult in
-        let object = try Product(dictionary: data.item ?? [:])
-        return APIGatewayProxyResult(object: object, statusCode: 200)
+    let future = service.readItem(key: sku)
+        .flatMapThrowing { data -> Product in
+            return try Product(dictionary: data.item ?? [:])
     }
     return future
 }
 
-let update: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
-    
+let read = APIGatewayProxyLambda<Product>(config: responseOK, handler: readHandler)
+
+let updateHandler: (APIGatewayProxySimpleEvent, Context) throws -> EventLoopFuture<Product> = { (event,context) throws -> EventLoopFuture<Product> in
     let product: Product = try event.object()
-    let future = service.updateItem(product: product).map { (data) -> APIGatewayProxyResult in
-        return APIGatewayProxyResult(object: product, statusCode: 200)
+    let future = service.updateItem(product: product)
+        .flatMapThrowing { (data) -> Product in
+            return product
     }
     return future
 }
 
-let delete: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult>  in
+let update = APIGatewayProxyLambda<Product>(config: responseOK, handler: updateHandler)
+
+
+struct EmptyResponse: Codable {
     
+}
+
+let deleteHandler: (APIGatewayProxySimpleEvent, Context) throws -> EventLoopFuture<EmptyResponse> = { (event,context) throws -> EventLoopFuture<EmptyResponse> in
     guard let sku = event.pathParameters?["sku"] else {
         throw APIError.invalidRequest
     }
-    
-    let future = service.deleteItem(key: sku).flatMapThrowing { data -> APIGatewayProxyResult in
-        return APIGatewayProxyResult(statusCode: 204,
-                                     body: "")
+    let future = service.deleteItem(key: sku)
+        .flatMapThrowing { (data) -> EmptyResponse in
+            return EmptyResponse()
     }
     return future
 }
 
-let list: APIGatewaySyncLambda = { (event,context) throws -> EventLoopFuture<APIGatewayProxyResult> in
-    let future = service.listItems().flatMapThrowing { data -> [Product] in
-        let products: [Product]? = try data.items?.compactMap { (item) -> Product in
-            return try Product(dictionary: item)
-        }
-        return products ?? []
-    }.map { products -> APIGatewayProxyResult in
-        return APIGatewayProxyResult(object: products, statusCode: 200)
+let delete = APIGatewayProxyLambda<EmptyResponse>(config: responseNoContent, handler: deleteHandler)
+
+
+let listHandler: (APIGatewayProxySimpleEvent, Context) throws -> EventLoopFuture<[Product]> = { (event,context) throws -> EventLoopFuture<[Product]> in
+    let future = service.listItems()
+        .flatMapThrowing { data -> [Product] in
+            let products: [Product]? = try data.items?.compactMap { (item) -> Product in
+                return try Product(dictionary: item)
+            }
+            return products ?? []
     }
     return future
 }
+
+let list = APIGatewayProxyLambda<[Product]>(config: responseOK, handler: listHandler)
 
 do {
     let sprinter = try SprinterNIO()
