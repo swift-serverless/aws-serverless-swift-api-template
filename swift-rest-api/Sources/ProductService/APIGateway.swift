@@ -125,7 +125,9 @@ public struct APIGatewayProxyResult: Codable {
         self.init(
             statusCode: statusCode,
             headers: ["Content-Type": "application/json",
-                      "Access-Control-Allow-Origin": "*"],
+                      "Access-Control-Allow-Origin": "*",
+                      "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+                      "Access-Control-Allow-Credentials": "true"],
             body: outBody
         )
     }
