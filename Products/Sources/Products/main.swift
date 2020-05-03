@@ -18,7 +18,7 @@ import FoundationNetworking
 #endif
 import LambdaSwiftSprinter
 import LambdaSwiftSprinterNioPlugin
-import DynamoDB
+import AWSDynamoDB
 import NIO
 import NIOHTTP1
 import ProductService
@@ -33,8 +33,8 @@ guard let tableName = ProcessInfo.processInfo.environment["PRODUCTS_TABLE_NAME"]
 
 let region: Region
 
-if let awsRegion = ProcessInfo.processInfo.environment["AWS_REGION"],
-    let value = Region(rawValue: awsRegion) {
+if let awsRegion = ProcessInfo.processInfo.environment["AWS_REGION"] {
+    let value = Region(rawValue: awsRegion)
     region = value
     logger.info("AWS_REGION: \(region)")
 } else {
@@ -43,7 +43,8 @@ if let awsRegion = ProcessInfo.processInfo.environment["AWS_REGION"],
     logger.info("AWS_REGION: us-east-1")
 }
 
-let db = DynamoDB(region: region)
+let awsClient: AWSHTTPClient = httpClient as! AWSHTTPClient
+let db = DynamoDB(region: region, httpClientProvider: .shared(awsClient))
 
 let service = ProductService(
     db: db,

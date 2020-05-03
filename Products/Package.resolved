@@ -29,39 +29,21 @@
         }
       },
       {
-        "package": "AWSSDKSwift",
+        "package": "aws-sdk-swift",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift.git",
         "state": {
           "branch": null,
-          "revision": "dc740f3c83be9438761d32b2d5e86cb7d0d00c45",
-          "version": "4.2.1"
+          "revision": "eeb30fac3d95a377d8c5bb4b33efed932061f42d",
+          "version": "5.0.0-alpha.3"
         }
       },
       {
-        "package": "AWSSDKSwiftCore",
+        "package": "aws-sdk-swift-core",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift-core.git",
         "state": {
           "branch": null,
-          "revision": "d702cd9d4e95fd1b2c455b436f2b655e5d966306",
-          "version": "4.2.2"
-        }
-      },
-      {
-        "package": "HypertextApplicationLanguage",
-        "repositoryURL": "https://github.com/swift-aws/HypertextApplicationLanguage.git",
-        "state": {
-          "branch": null,
-          "revision": "aa2c9141d491682f17b2310aed17b9adfc006256",
-          "version": "1.1.1"
-        }
-      },
-      {
-        "package": "INIParser",
-        "repositoryURL": "https://github.com/swift-aws/Perfect-INIParser.git",
-        "state": {
-          "branch": null,
-          "revision": "42de0efc7a01105e19b80d533d3d282a98277f6c",
-          "version": "3.0.3"
+          "revision": "ccea4b98758e9e8bb907a4dc9bb15d01d8a3c736",
+          "version": "5.0.0-alpha.3.2"
         }
       },
       {
@@ -98,15 +80,6 @@
           "branch": null,
           "revision": "af46d9b58fafbb76f9b01177568d435a1b024f99",
           "version": "2.6.2"
-        }
-      },
-      {
-        "package": "swift-nio-ssl-support",
-        "repositoryURL": "https://github.com/apple/swift-nio-ssl-support.git",
-        "state": {
-          "branch": null,
-          "revision": "c02eec4e0e6d351cd092938cf44195a8e669f555",
-          "version": "1.0.0"
         }
       },
       {

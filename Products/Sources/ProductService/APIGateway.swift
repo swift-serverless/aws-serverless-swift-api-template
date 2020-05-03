@@ -13,7 +13,7 @@
 //    limitations under the License.
 
 import Foundation
-import DynamoDB
+import AWSDynamoDB
 import NIO
 import LambdaSwiftSprinter
 import LambdaSwiftSprinterNioPlugin
