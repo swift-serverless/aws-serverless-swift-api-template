@@ -14,14 +14,20 @@
 
 # Use this tag to build a customized local image
 
-SWIFT_VERSION?=5.2.3
-LAYER_VERSION?=5-2.3
+SWIFT_VERSION?=nightly-amazonlinux2
+LAYER_VERSION?=nightly-amazonlinux2
+DOCKER_OS?=amazonlinux2
+
+# SWIFT_VERSION?=5.2.3-bionic
+# LAYER_VERSION?=5-2-3-bionic
+# DOCKER_OS=bionic
 
 DOCKER_TAG=nio-swift:$(SWIFT_VERSION)
 SWIFT_DOCKER_IMAGE=$(DOCKER_TAG)
 SWIFT_LAMBDA_LIBRARY=nio-swift-lambda-runtime-$(LAYER_VERSION)
 SWIFT_CONFIGURATION=release
 
+BUILD_PATH=.build
 SERVERLESS_BUILD=build
 SERVERLESS_LAYER=swift-lambda-runtime
 
@@ -44,6 +50,15 @@ LAMBDA_BUILD_PATH=$(ROOT_BUILD_PATH)
 # use this for local development
 MOUNT_ROOT=$(shell pwd)
 DOCKER_PROJECT_PATH=$(SWIFT_PROJECT_PATH)
+ROOT_BUILD_PATH=./.build
+LAYER_BUILD_PATH=$(ROOT_BUILD_PATH)/layer
+LAMBDA_BUILD_PATH=$(ROOT_BUILD_PATH)/lambda
+LOCAL_LAMBDA_PATH=$(ROOT_BUILD_PATH)/local
+LOCALSTACK_TMP=$(ROOT_BUILD_PATH)/.tmp
+TMP_BUILD_PATH=$(ROOT_BUILD_PATH)/tmp
+DATETIME=$(shell date +'%y%m%d-%H%M%S')
+DOCKER_FOLDER=docker
+BOOTSTRAP=$(DOCKER_FOLDER)/$(SWIFT_VERSION)/bootstrap
 			
 docker_build:
 	docker build --tag $(DOCKER_TAG) docker/$(SWIFT_VERSION)/.
@@ -56,13 +71,13 @@ build_lambda:
 			$(SWIFT_DOCKER_IMAGE) \
 			/bin/bash -c "swift build --configuration $(SWIFT_CONFIGURATION)"
 
-cp_to_serverless_build: create_build_directory
+cp_lambda_to_sls_build_local: create_build_directory
 	docker run \
 			--rm \
 			--volume "$(MOUNT_ROOT)/:/src" \
 			--workdir "/src/$(DOCKER_PROJECT_PATH)" \
 			$(SWIFT_DOCKER_IMAGE) \
-			/bin/bash -c "swift build -c $(SWIFT_CONFIGURATION) --show-bin-path | tr '\n' '/' > .build/path.txt; echo '$(SWIFT_EXECUTABLE)' >> .build/path.txt |  cat .build/path.txt | xargs cp -t ../$(SERVERLESS_BUILD); rm .build/path.txt"
+			/bin/bash -c "swift build -c $(SWIFT_CONFIGURATION) --show-bin-path | tr '\n' '/' > $(BUILD_PATH)/path.txt; echo '$(SWIFT_EXECUTABLE)' >> $(BUILD_PATH)/path.txt |  cat $(BUILD_PATH)/path.txt | xargs cp -t ../$(SERVERLESS_BUILD); rm $(BUILD_PATH)/path.txt"
 
 create_build_directory:
 	if [ ! -d "$(LAMBDA_BUILD_PATH)" ]; then mkdir -p $(LAMBDA_BUILD_PATH); fi
@@ -70,27 +85,28 @@ create_build_directory:
 	if [ ! -d "$(SERVERLESS_BUILD)" ]; then mkdir -p $(SERVERLESS_BUILD); fi
 
 package_lambda: create_build_directory build_lambda
-	zip -r -j $(LAMBDA_BUILD_PATH)/$(LAMBDA_ZIP) $(SWIFT_PROJECT_PATH)/.build/$(SWIFT_CONFIGURATION)/$(SWIFT_EXECUTABLE)
+	zip -r -j $(LAMBDA_BUILD_PATH)/$(LAMBDA_ZIP) $(SWIFT_PROJECT_PATH)/$(BUILD_PATH)/$(SWIFT_CONFIGURATION)/$(SWIFT_EXECUTABLE)
 
 package_layer: create_build_directory
 	$(eval SHARED_LIBRARIES := $(shell cat docker/$(SWIFT_VERSION)/swift-shared-libraries.txt | tr '\n' ' '))
 	mkdir -p $(SHARED_LIBS_FOLDER)/lib
+ifeq '$(DOCKER_OS)' 'xenial'
 	docker run \
 			--rm \
 			--volume "$(shell pwd)/:/src" \
 			--workdir "/src" \
 			$(SWIFT_DOCKER_IMAGE) \
 			cp /lib64/ld-linux-x86-64.so.2 $(SHARED_LIBS_FOLDER)
+endif
 	docker run \
 			--rm \
 			--volume "$(shell pwd)/:/src" \
 			--workdir "/src" \
 			$(SWIFT_DOCKER_IMAGE) \
 			cp -t $(SHARED_LIBS_FOLDER)/lib $(SHARED_LIBRARIES)
-	zip -r $(LAYER_BUILD_PATH)/$(LAYER_ZIP) bootstrap $(SHARED_LIBS_FOLDER)
+	cp $(BOOTSTRAP) $(SHARED_LIBS_FOLDER)
+	cd $(SHARED_LIBS_FOLDER); pwd; zip -r ../$(LAYER_BUILD_PATH)/$(LAYER_ZIP) bootstrap lib
 
-unzip_package_to_build: create_build_directory
+cp_layer_to_sls_build_local: create_build_directory
 	if [ ! -d "./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)" ]; then mkdir -p ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER); fi
-	cp $(LAYER_BUILD_PATH)/$(LAYER_ZIP) ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)/$(LAYER_ZIP)
-	unzip ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)/$(LAYER_ZIP) -d ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)
-	rm ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)/$(LAYER_ZIP)
+	cp -R ./$(SHARED_LIBS_FOLDER)/. ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)

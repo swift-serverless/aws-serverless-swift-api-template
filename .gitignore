@@ -1,3 +1,4 @@
 build
 swift-shared-libs
 .serverless
+.build

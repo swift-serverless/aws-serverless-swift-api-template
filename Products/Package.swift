@@ -7,6 +7,7 @@ let package = Package(
     name: "swift-rest-api",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
+        .executable(name: "Products", targets: ["Products"]),
         .library(
             name: "ProductService",
             targets: ["ProductService"]

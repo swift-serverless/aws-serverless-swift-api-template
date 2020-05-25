@@ -1,5 +1,5 @@
 make docker_build
 make package_layer
 make build_lambda
-make unzip_package_to_build
-make cp_to_serverless_build
+make cp_layer_to_sls_build_local
+make cp_lambda_to_sls_build_local
