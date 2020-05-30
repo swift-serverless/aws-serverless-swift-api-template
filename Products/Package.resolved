@@ -11,24 +11,6 @@
         }
       },
       {
-        "package": "LambdaSwiftSprinter",
-        "repositoryURL": "https://github.com/swift-sprinter/aws-lambda-swift-sprinter-core",
-        "state": {
-          "branch": null,
-          "revision": "6941e41194bde0e57fb0deb23be620f2b8dd626d",
-          "version": "1.0.0"
-        }
-      },
-      {
-        "package": "LambdaSwiftSprinterNioPlugin",
-        "repositoryURL": "https://github.com/swift-sprinter/aws-lambda-swift-sprinter-nio-plugin",
-        "state": {
-          "branch": null,
-          "revision": "35d3ab84bf83fc881844b5f7483cb2a1d942a23f",
-          "version": "1.0.1"
-        }
-      },
-      {
         "package": "aws-sdk-swift",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift.git",
         "state": {
@@ -44,6 +26,24 @@
           "branch": null,
           "revision": "ccea4b98758e9e8bb907a4dc9bb15d01d8a3c736",
           "version": "5.0.0-alpha.3.2"
+        }
+      },
+      {
+        "package": "swift-aws-lambda-runtime",
+        "repositoryURL": "https://github.com/swift-server/swift-aws-lambda-runtime.git",
+        "state": {
+          "branch": null,
+          "revision": "75d05ca9548bbee6dd80c6b23b68bdb60dbc84a2",
+          "version": "0.1.0"
+        }
+      },
+      {
+        "package": "swift-backtrace",
+        "repositoryURL": "https://github.com/swift-server/swift-backtrace.git",
+        "state": {
+          "branch": null,
+          "revision": "f2fd8c4845a123419c348e0bc4b3839c414077d5",
+          "version": "1.2.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "16ab4d657e1ad4e77bd5f8b94af8538561643053",
-          "version": "2.14.0"
+          "revision": "c5fa0b456524cd73dc3ddbb263d4f46c20b86ca3",
+          "version": "2.17.0"
         }
       },
       {

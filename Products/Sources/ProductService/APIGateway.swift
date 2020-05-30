@@ -15,8 +15,6 @@
 import Foundation
 import AWSDynamoDB
 import NIO
-import LambdaSwiftSprinter
-import LambdaSwiftSprinterNioPlugin
 
 public struct APIGatewayEventIdentity: Codable {
     public let accessKey: String?
@@ -92,7 +90,7 @@ public struct APIGatewayProxySimpleEvent: Codable {
     
 }
 
-public struct APIGatewayProxyResult: Codable {
+public struct APIGatewayProxyResult<T>: Codable {
     
     public let isBase64Encoded: Bool?
     public let statusCode: Int
