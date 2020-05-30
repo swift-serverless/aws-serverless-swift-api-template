@@ -20,24 +20,23 @@ public struct Product: Codable {
 
 ## API Definition
 
+The API implements the following schema:
+
 ```
 - /Product
-    -> GET
-    -> POST
-    -> PUT 
+    -> GET - List Products
+    -> POST - Create Products
+    -> PUT - Update Products
 - /Product/{sku}
-    -> DELETE
-    -> GET
+    -> DELETE - Delete Product
+    -> GET - Get Product
 ```
 
-JSON body for PUT and POST
-```JSON
-{
-	"sku": "3",
-    "name": "Book",
-    "description": "Book 3"
-}
-```
+More details on the API are described in [swagger.json](swagger.json).
+
+The file can be imported in popular tool such as PostMan.
+
+The full [HTML documentation](swagger-doc.html) has been generated using [pretty-swag](https://twskj.github.io/pretty-swag/)
 
 ## Serverless architecture
 

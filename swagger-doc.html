@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>.pointer,footer>a{cursor:pointer}[v-cloak]{display:none}body{background:#fdfdfd}.indent{padding-left:1em}.r-margin{margin-right:2em}.r-indent{padding-right:1em}.padding-all{padding:1em}.b-margin{margin-bottom:1em}no-overflow{overflow:auto}.bold{font-weight:700}.api-block{border:1px solid;margin:.5rem 0 1.5rem}.api-header{font-size:13pt}.api-header>.api-title{font-size:13pt;padding:.5em;display:inline-block}.tag-container{padding:1em .3em 0 .3em;height:2.2em}.tag-container>.tag{display:inline-block;margin-right:10px;padding:0 .5rem;white-space:nowrap;position:relative;min-width:3rem;text-align:center;background:linear-gradient(to bottom,#fed970 0,#febc4a 100%);background-color:#FEC95B;color:#963;font-weight:700;text-decoration:none;text-shadow:0 1px rgba(255,255,255,.4);border-top:1px solid #EDB14A;border-bottom:1px solid #CE922E;border-right:1px solid #DCA03B;border-left:1px solid #EDB14A;border-radius:3px;box-shadow:inset 0 1px #FEE395,0 1px 2px rgba(0,0,0,.21)}.round-border{border-radius:3px}.showReqBtn{padding-bottom:1.5rem}.fade-enter-active,.fade-leave-active{transition:opacity .5s}.fade-leave-active{transition:opacity .05s}.fade-enter,.fade-leave-to{opacity:0}.tool-panel{border:1px solid #9e9e9e;padding:1em 1em 0 1em;margin:1rem 0 1rem 0}[type=radio].with-gap:checked+label:before{border-radius:50%;border:2px solid #555555}[type=radio].with-gap:checked+label:after{border-radius:50%;border:1px solid #333;background-color:#333;z-index:0;-webkit-transform:scale(.5);-moz-transform:scale(.5);-ms-transform:scale(.5);-o-transform:scale(.5);transform:scale(.5)}input[type=text]:focus:not([readonly])+label{color:#666}input[type=text]:focus:not([readonly]){border-bottom:1px solid #64b5f6;box-shadow:0 1px 0 0 #42a5f5}textarea{white-space:pre;overflow:scroll;overflow-x:scroll;overflow-y:scroll;height:10em}.console{font-family:monospace;font-weight:400;font-style:normal}.warning-yellow-border{border-color:#ffc400}blockquote{padding:.5em 0 .5em 1em}#toast-container{min-width:100%;bottom:0;top:95%;right:0;left:0}::-webkit-input-placeholder{color:#DDD}::-moz-placeholder{color:#DDD}:-ms-input-placeholder{color:#DDD}:-moz-placeholder{color:#DDD}body{display:flex;min-height:100vh;flex-direction:column}main{flex:1 0 auto}.navButtonContainerR{position:absolute;top:0;right:1rem}.navButtonContainerL{position:absolute;top:0;left:1rem}.navButton{padding:0 1rem}footer>a{color:#f5f5f5}td{vertical-align:top}h1{font-size:2.75rem}h2{font-size:2.2rem}h3{font-size:2rem}h4{font-size:1.75rem}h5{font-size:1.5rem}h6{font-size:1.28rem}table.fixed{table-layout:fixed}table.fixed td{overflow-x:auto}.lpad5px{padding-left:5px}th.status{width:64px}th.desc{width:256px}th.location,th.name{width:128px}th.required{width:90px}no-padding-bot{padding-bottom:0}.red-border{border-color:#ff8a80}.pink-border{border-color:#ff80ab}.purple-border{border-color:#ea80fc}.deep-purple-border{border-color:#b388ff}.indigo-border{border-color:#8c9eff}.blue-border{border-color:#82b1ff}.light-blue-border{border-color:#80d8ff}.cyan-border{border-color:#4dd0e1}.teal-border{border-color:#80cbc4}.green-border{border-color:#4caf50}.light-green-border{border-color:#aed581}.lime-border{border-color:#c0ca33}.yellow-border{border-color:#fdd835}.amber-border{border-color:#ffb300}.orange-border{border-color:#ffd180}.deep-orange-border{border-color:#ff9e80}.brown-border{border-color:#bcaaa4}.grey-border{border-color:#bdbdbd}.blue-grey-border{border-color:#90a4ae}.white-border{border-color:#fdfdfd}.slide-vert-enter-active{transition:all .4s ease}.slide-vert-leave-active{transition:all .2s ease}.slide-vert-enter,.slide-vert-leave-to{transform:translateY(100%)}table.compact input{margin:0;border-bottom:0;height:1rem}strong{font-weight:900}.b-margin-one-half{margin-bottom:1.5rem}.pad-top{padding-top:1rem}html{color:rgba(53,53,53,0.87)}.slim-grey-border{border:0.5px solid #bdbdbd}blockquote.not-found{border-left:5px solid #e0e0e0}#search{line-height: normal}.schema-key{color:#2468ce}.schema-val{color:#079107}.schema-required::after{content:"*";color:red;font-size:66%;vertical-align:super}.schema-comment{color:#929292;font-style:italic}</style>
+    <title></title>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <div :class="{ 'navbar-fixed': appConfig.fixedNav, 'hide': !appConfig.showNav }">
+            <nav :class="getThemeColor('default')" role="navigation">
+                <div class="nav-wrapper container">
+                    <div class="input-field">
+                        <input id="search" autocomplete="off" type="search" placeholder="search by tag" title="Use - prefix to exclude unwanted tags. Ex: -POST" required v-model="filterByTag" @keyup.enter="$event.target.blur()">
+                        <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                        <i class="material-icons" @click="clearSearch()">close</i>
+                    </div>
+                </div>
+                <div class="navButtonContainerR">
+                    
+                    <a class="navButton pointer waves-effect waves-light" @click="collapseAllApi(false)">Collapse</a>
+                    <a class="navButton pointer waves-effect waves-light" @click="collapseAllApi(true)">Expand</a>
+                    
+                </div>
+                
+            </nav>
+        </div>
+
+        <transition name="slide-vert">
+          <div v-show="appData.showConsole" id="consolePanel" class="input-field" style="background-color: rgba(0,0,0,.67);color: whitesmoke; position: absolute; left:0;right:0; z-index: 2; padding: 1.5rem;">
+            <div v-for="log in appData.consoleLogs">{{log}}</div>
+            <input type="text" spellcheck="false" v-model="appData.console" @keyup.enter="parseCmd" @keydown.tab.prevent @keyup.tab="autoComplete" ref="txtConsole">
+          </div>
+        </transition>
+
+        <div class="container">
+            <div class="section">
+                <h1 class="grey-text text-darken-3">{{name}}</h1>
+                <div class="indent">
+                    <p class="grey-text text-darken-1">{{summary}}</p>
+                    <div v-for="(value,key) in metadata"><span class="bold">{{key}}</span><span class="grey-text text-darken-1">: </span><span class="grey-text text-darken-1" v-html="value"></span></div>
+                    <div v-if="getAllTags.length > 0" class="pad-top">
+                    <span class="bold">Available Tags: </span><span class="pointer blue-text text-lighten-1" v-for="(tag, index) in getAllTags" @click="addToSearch(tag)">{{index===getAllTags.length-1? tag:tag+", "}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h5 v-if="getAllTags.length > 0">Paths</h5>
+                <blockquote class="not-found" v-else>No results containing all your search terms were found</blockquote>
+                <div class="indent" v-for="(api,api_idx) in apis" v-if="api.visible">
+                    <div class="indent">
+                        <div class="row pointer blue-text text-lighten-1"><span @click="api.showMe=!api.showMe">{{api.path}}</span></div>
+                        <transition name="fade">
+                            <div v-if="api.showMe">
+                                <div class="api-block round-border" :class="[getThemeColor(method.name)+'-border']" v-for="(method,method_idx) in api.methods" v-if="method.visible">
+                                    <div class="api-header lighten-5 round-border pointer" :class="[getThemeColor(method.name)]" @click="method.showMe = !method.showMe">
+                                        <div class="api-title light" :class="[getThemeColor(method.name,true)]">{{method.name}} {{api.path}}</div>
+                                    </div>
+                                    <transition name="fade">
+                                        <div v-if="method.showMe">
+                                            <div class="tag-container">
+                                                <div class="tag right no-overflow" :class="[appConfig.showNav ? 'pointer':'']" v-for="tag in method.tags" @click="addToSearch(tag)">{{tag}}</div>
+                                            </div>
+                                            <div class="indent r-indent">
+                                                <h5 :class="[getThemeColor('default')+'-text']" v-if="method.summary">Summary</h5>
+                                                <p class="indent" v-if="method.summary">{{method.summary}}</p>
+                                                <h5 :class="[getThemeColor('default')+'-text']" v-if="method.desc">Description</h5>
+                                                <p class="indent" v-if="method.desc">{{method.desc}}</p>
+                                                <h5 :class="[getThemeColor('default')+'-text']" v-if="method.params.length > 0">Parameters</h5>
+                                                <table class="bordered fixed b-margin-one-half" v-if="method.params.length > 0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="name">Name</th>
+                                                            <th class="location">Located In</th>
+                                                            <th class="desc">Description</th>
+                                                            <th class="required">Required</th>
+                                                            <th>Schema</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="param in method.params">
+                                                            <td><p class="lpad5px">{{param.name}}</p></td>
+                                                            <td><p class="lpad5px">{{param.location}}</p></td>
+                                                            <td><p class="lpad5px">{{param.desc}}</p></td>
+                                                            <td><p class="lpad5px">{{param.required ? 'Yes':'No'}}</p></td>
+                                                            <td><p class="lpad5px"><pre><span v-for="token in getSchema(param.schema,param.schemaState,param.schemaRequired)" v-bind:class="{pointer: isFoldable(token)}" @click="schemaClicked(token,param.schemaState)" v-html="syntaxHighlight(token)"></span></pre></p></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <h5 :class="[getThemeColor('default')+'-text']" v-if="method.responses.length > 0">Responses</h5>
+                                                <table class="bordered fixed b-margin-one-half" v-if="method.responses.length > 0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="status">Code</th>
+                                                            <th class="desc">Description</th>
+                                                            <th>Schema</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="res in method.responses">
+                                                            <td><p class="lpad5px" v-bind:class="[res.code === '200' ? 'green-text darken-2' : '']" >{{res.code}}</p></td>
+                                                            <td><p class="lpad5px">{{res.desc}}</p></td>
+                                                            <td><p class="lpad5px"><pre><span v-for="token in getSchema(res.schema,res.schemaState)" v-bind:class="{pointer: isFoldable(token)}" @click="schemaClicked(token,res.schemaState)" v-html="syntaxHighlight(token)"></span></pre></p></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <div v-if="Object.keys(method.examples).length > 0" class="b-margin-one-half">
+                                                    <h5 :class="[getThemeColor('default')+'-text']">Response Example</h5>
+                                                    <div class="indent tool-panel">
+                                                        <div class="card grey lighten-4" v-for="(value,code) in method.examples">
+                                                            <div class="card-content black-text">
+                                                                <span class="card-title">{{code}}</span>
+                                                                <pre v-html="value"></pre>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="showReqBtn" v-if="host && appConfig.showDevPlayground">
+                                                    <a class="btn waves-effect" :class="[getThemeColor(method.name,true)]" @click="method.showTool = true" v-if="!method.showTool"><i class="material-icons left">mode_edit</i>Try this operation</a>
+                                                    <a class="right pointer" @click="method.showTool = false" v-else>Hide</a>
+                                                </div>
+
+                                                <transition name="fade">
+                                                    <div class="request-panel" v-if="method.showTool && appConfig.showDevPlayground">
+                                                        <h5>Request</h5>
+                                                        <div class="tool-panel round-border">
+                                                            <p class="bold">Scheme</p>
+                                                            <form>
+                                                                <span v-for="(scheme,idx) in method.request.schemes">
+                                                                    <input class="with-gap" v-bind:name="scheme" type="radio" v-bind:value="scheme" v-bind:id="api_idx+'_'+method_idx+'_'+scheme" v-model="method.request.choosen.scheme"/>
+                                                                    <label class="r-margin" v-bind:for="api_idx+'_'+method_idx+'_'+scheme" v-bind:class="method.request.choosen.scheme === scheme ? 'black-text' : ''">{{scheme}}</label>
+                                                                </span>
+                                                            </form>
+                                                            <p class="bold">HTTP Headers</p>
+                                                            <table class="highlight compact" v-if="Object.keys(method.request.choosen.headers).length !== 0">
+                                                                <colgroup>
+                                                                    <col span="1" style="width: 42%;">
+                                                                    <col span="1" style="width: 48%;">
+                                                                    <col span="1" style="width: 10%;">
+                                                                </colgroup>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Value</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr v-for="(value, key) in method.request.choosen.headers">
+                                                                        <td>{{key}}</td>
+                                                                        <td><input type="text" v-model="method.request.choosen.headers[key]"></td>
+                                                                        <td><a class="pointer" @click="removeFromHeaderList(key,method.request.choosen)">Remove</a></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                            <div class="row">
+                                                                <div class="input-field col s5">
+                                                                    <input v-bind:id="api_idx+'_'+method_idx+'_headerName'" type="text" @keyup.enter="addToHeaderList(method.request.choosen,api_idx+'_'+method_idx+'_headerName')" v-model="method.request.choosen.headerName">
+                                                                    <label v-bind:for="api_idx+'_'+method_idx+'_headerName'">name</label>
+                                                                </div>
+                                                                <div class="input-field col s6">
+                                                                    <input v-bind:id="api_idx+'_'+method_idx+'_headerValue'" type="text" @keyup.enter="addToHeaderList(method.request.choosen,api_idx+'_'+method_idx+'_headerName')" v-model="method.request.choosen.headerValue">
+                                                                    <label v-bind:for="api_idx+'_'+method_idx+'_headerValue'">value</label>
+                                                                </div>
+                                                                <div class="input-field col s1">
+                                                                    <a class="btn-floating btn-large waves-effect waves-light" :class="[getThemeColor(method.name,true)]" @click="addToHeaderList(method.request.choosen,api_idx+'_'+method_idx+'_headerName')"><i class="material-icons">add</i></a>
+                                                                </div>
+                                                            </div>
+                                                            <h5>Parameters</h5>
+                                                            <div class="tool-panel round-border">
+                                                                <div v-for="(param,param_idx) in method.params">
+                                                                    <div class="file-field input-field" v-if="param.type==='file'">
+                                                                        <div class="btn" :class="[getThemeColor(method.name,true)]">
+                                                                            <span>{{param.name}}</span>
+                                                                            <input type="file" multiple v-bind:id="api_idx+'_'+method_idx+'_'+param.name" @change="setFilename($event,method.params[param_idx])">
+                                                                        </div>
+                                                                        <div class="file-path-wrapper">
+                                                                            <input class="file-path" type="text" :placeholder="param.desc.replace(/<p>(.*)<\/p>/i,'$1')" v-model="method.params[param_idx].value.filenames">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="input-field" v-if="param.location !== 'body' &&  param.type !== 'file'">
+                                                                        <label v-bind:for="api_idx+'_'+method_idx+'_'+param.name" :class="[method.params[param_idx].value ? 'active' : '']">{{param.name}}</label>
+                                                                        <input v-bind:id="api_idx+'_'+method_idx+'_'+param.name" type="text" v-model="method.params[param_idx].value">
+                                                                    </div>
+                                                                </div>
+                                                                <div v-if="hasBodyParam(method.params)">
+                                                                    <label  v-bind:for="api_idx+'_'+method_idx+'_requestBody'">Body</label>
+                                                                    <textarea v-bind:id="api_idx+'_'+method_idx+'_requestBody'" v-model="method.request.choosen.body"></textarea>
+                                                                </div>
+                                                                <h6 class="grey-text">Request</h6>
+                                                                <div class="grey lighten-3 console padding-all slim-grey-border">
+                                                                    <span class="bold red-text">{{method.name.toUpperCase()}}</span> <a v-bind:href="getURL(method,api.path)">{{getURL(method,api.path)}}</a> HTTP/1.1
+                                                                    <div><span class="bold">Host:</span> {{host}}</div>
+                                                                    <div v-if="userAgent"><span class="bold">User-Agent:</span> {{userAgent}}</div>
+                                                                    <div v-for="(value,key) in method.request.choosen.headers"><span class="bold">{{key}}:</span> {{value}}</div>
+                                                                    <div v-if="computeBody(method)"><pre>{{computeBody(method)}}</pre></div>
+                                                                </div>
+
+                                                                <h6 class="grey-text">Response</h6>
+                                                                <div class="grey lighten-3 console padding-all slim-grey-border">
+                                                                    <textarea wrap='off' readonly>{{method.request.choosen.result}}</textarea>
+                                                                </div>
+
+                                                                <div v-if="mixContent(method.request.choosen)">
+                                                                    <blockquote class="warning-yellow-border yellow lighten-5"> <i class="material-icons left">warning</i> This is a Mixed Content call. Many browsers will block this by default. <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content" target="_blank">Learn more</a></blockquote>
+                                                                </div>
+                                                                <div v-else-if="crossDomain(method.request.choosen)">
+                                                                    <blockquote class="warning-yellow-border yellow lighten-5"> <i class="material-icons left">warning</i> This is a cross-origin call. Make sure the server at <span class="blue-text">{{getDestHost(method.request.choosen.scheme)}}</span> accepts POST requests from <span class="blue-text">{{currentHost}}</span>. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">Learn more</a></blockquote>
+                                                                </div>
+                                                                <a class="waves-effect waves-light btn b-margin" :class="[getThemeColor(method.name,true)]" @click="sendRequest(method.name,getURL(method,api.path),getRequestBody(method),method.request.choosen.headers,api_idx,method_idx)">Send Request</a>
+                                                                <transition name="fade">
+                                                                    <span v-show="method.request.choosen.rawResult">
+                                                                        <a class="waves-effect waves-light btn b-margin" :class="[getThemeColor(method.name,true)]" @click="startDownload(method.request.choosen.rawResult,method.request.choosen.resultFileName)">Download</a>
+                                                                        <a v-if="isPreviewAbleContentType(method.request.choosen.resultContentType)" class="waves-effect waves-light btn b-margin" :class="[getThemeColor(method.name,true)]" @click="launchPreview(method.request.choosen.rawResult,method.request.choosen.resultContentType,method.request.choosen.resultFileName)">Preview</a>
+                                                                    </span>
+                                                                </transition>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </transition>
+                                            </div>
+                                        </div>
+                                    </transition>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="container grey-text text-lighten-4 thin">Generated Friday, May 29, 2020, 08:02 AM by <a href="https://github.com/twskj/pretty-swag">pretty-swag</a></footer>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@2.1.10/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alvaro-prieto/colResizable@1.6.0/colResizable-1.6.min.js"></script>
+
+    <script>
+        var context = {
+            el: "#app"
+            , computed: {
+                filterByTag: {
+
+                    get: function () {
+                        return this.appData.search;
+                    }
+                    ,set: function (newValue) {
+
+                        this.appData.search = newValue;
+                        if(newValue == ""){
+                            this.setAllVisible(true);
+                            return;
+                        }
+                        newValue = newValue || "";
+                        newValue = newValue.toLowerCase();
+                        var search_tokens = new Set(this.tokenizeSearchText(newValue));
+                        var includeTags = new Set();
+                        var excludeTags = new Set();
+                        var mustHaveTags = new Set();
+
+                        for(var token of search_tokens) {
+
+                            if(token === "" || token === '"'){
+                                continue;
+                            }
+                            else if(token[0] === "-"){
+                                excludeTags.add(token.substr(1));
+                            }
+                            else if(token.length > 2 && token[0] === '"' && token.endsWith('"')){
+                                mustHaveTags.add(token.substr(1,token.length-2));
+                            }
+                            else if(token[0] !== '"'){
+                                includeTags.add(token);
+                            }
+                        }
+
+                        for(var i=0;i<this.apis.length;i++){
+
+                            var api_visible = false;
+                            var api = this.apis[i];
+                            for(var j=0;j<api.methods.length;j++){
+
+                                var method = api.methods[j];
+                                var visible = includeTags.size == 0 && mustHaveTags.size == 0;
+                                var matched = false;
+                                var tags = new Set();
+                                for(var k=0;k<method.tags.length;k++){
+                                    var tag = method.tags[k].toLowerCase();
+                                    tags.add(tag);
+                                    if(excludeTags.has(tag)){
+                                        visible = false;
+                                        matched = true;
+                                        break;
+                                    }
+                                    for(var t of includeTags){
+                                        if(tag.startsWith(t)){
+                                            visible = true;
+                                            matched = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if(!matched && !visible && mustHaveTags.size > 0){
+                                    visible = true;
+                                    for(var musthavetag of mustHaveTags){
+                                        if(!tags.has(musthavetag)){
+                                            visible = false
+                                            break;
+                                        }
+                                    }
+                                }
+                                method.visible = visible;
+                                if(visible){
+                                    api_visible = true;
+                                }
+                            }
+
+                            this.apis[i].visible = api_visible;
+                        }
+                    }
+                }
+                , getAllTags: function(){
+
+                    var result = {};
+                    for(var i=0;i<this.apis.length;i++){
+                        if(!this.apis[i].visible){
+                            continue;
+                        }
+                        var api = this.apis[i];
+                        for(var j=0;j<api.methods.length;j++){
+                            if(!api.methods[j].visible){
+                                continue;
+                            }
+                            var method = api.methods[j];
+                            if(!method.tags){
+                                break;
+                            }
+                            for(var k=0;k<method.tags.length;k++){
+                                result[method.tags[k]] = null;
+                            }
+                        }
+                    }
+
+                    return Object.keys(result).sort();
+                }
+                , userAgent: function(){
+                    return navigator.userAgent;
+                }
+            }
+            , methods:{
+                addToHeaderList: function(container,to_be_focused_id){
+                    var name = container.headerName.trim();
+                    if(!name){
+                        return;
+                    }
+                    var val = container.headerValue.trim();
+                    Vue.set(container.headers,name,val);
+                    container.headerName = "";
+                    container.headerValue = "";
+                    Vue.nextTick(function() {
+                        document.getElementById(to_be_focused_id).focus();
+                    });
+                }
+                ,addToSearch: function(keyword){
+
+                    if(!this.appConfig.showNav){
+                        return;
+                    }
+                    keyword = `"${keyword}"`;
+                    var tags = this.tokenizeSearchText(this.appData.search);
+                    
+                    var keyword_pos = tags.indexOf(keyword);
+                    if(keyword_pos !== -1){
+                        tags.splice(keyword_pos,1);
+                    }
+                    else{
+                        tags.push(keyword);
+                    }
+                    this.appData.search = tags.join(' ');
+                    this.filterByTag = this.appData.search;
+                }
+                ,getDestHost: function(scheme){
+                    var dest_port = ":"+this.port[scheme];
+                    if((dest_port === ":80" && scheme == "http") || (dest_port == ":443" && scheme === "https")){
+                        dest_port = "";
+                    }
+                    return this.host+dest_port;
+                }
+                ,crossDomain: function(choosen){
+
+                    var abs_target_host = this.host+':'+this.port[choosen.scheme];
+                    var curr_port = location.port;
+                    var abs_curr_host = this.currentHost;
+                    if(!curr_port){
+                        if(this.currentScheme === 'https'){
+                            abs_curr_host += ":443";
+                        }
+                        else if(this.currentScheme === 'http'){
+                            abs_curr_host += ":80";
+                        }
+                    }
+                    return abs_curr_host !== abs_target_host;
+                }
+                ,mixContent: function(choosen){
+                    return (this.currentScheme === "https" && choosen.scheme === "http");
+                }
+                ,removeFromHeaderList: function(key, container){
+                    Vue.delete(container.headers, key);
+                }
+                ,collapseAllApi: function(bool){
+                    for(var i=0;i<this.apis.length;i++){
+                        this.apis[i].showMe = bool;
+                    }
+                }
+                ,setAllVisible: function(bool){
+
+                    for(var i=0;i<this.apis.length;i++){
+
+                        for(var j=0;j<this.apis[i].methods.length;j++){
+                            this.apis[i].methods[j].visible = bool;
+                        }
+                        this.apis[i].visible = bool;
+                    }
+                }
+                ,launchPreview: function(data,contentType,fileName){
+                    var cacheDuration = 60000;
+                    if(contentType.indexOf('json') !== -1){
+                        var reader = new FileReader();
+                        reader.onload = function() {
+                            json = jsonPreview.replace('_data_',reader.result);
+                            json = json.replace('_title_',fileName);
+
+                            var myblob = new Blob([json], {
+                                type: 'text/html'
+                            });
+
+                            var url = window.URL.createObjectURL(myblob);
+                            var a = document.createElement("a");
+                            document.body.appendChild(a);
+                            a.style = "display: none";
+                            a.href = url;
+                            a.target = "_blank";
+                            a.click();
+                            setTimeout(function(){
+                                window.URL.revokeObjectURL(url);
+                            },cacheDuration);
+                            a.remove();
+                        }
+                        reader.readAsText(data);
+                    }
+                    else{
+                        var url = window.URL.createObjectURL(data);
+                        var a = document.createElement("a");
+                        document.body.appendChild(a);
+                        a.style = "display: none";
+                        a.href = url;
+                        a.target = "_blank";
+                        a.click();
+                        setTimeout(function(){
+                            window.URL.revokeObjectURL(url);
+                        },cacheDuration);
+                        a.remove();
+                    }
+                }
+                ,startDownload: function(data,resultFileName){
+
+                    if (data != null && navigator.msSaveBlob){
+                        return navigator.msSaveBlob(data, resultFileName);
+                    }
+
+                    var url = window.URL.createObjectURL(data);
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    a.href = url;
+                    a.download = resultFileName;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                }
+                ,isPreviewAbleContentType: function(contentType){
+                    if(!contentType){
+                        return false;
+                    }
+                    var keywords = ['json','xml','text','pdf','audio','video','html','plain'];
+                    contentType = contentType.toLowerCase();
+                    for(var i = 0;i<keywords.length;i++){
+                        if(contentType.indexOf(keywords[i]) !== -1){
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                ,getFileExtension: function(contentType){
+                    if(!contentType){
+                        return "";
+                    }
+                    var keywords = ['json','xml', 'pdf','mp3','mp4','htm','html'];
+                    contentType = contentType.toLowerCase();
+                    for(var i = 0;i<keywords.length;i++){
+                        if(contentType.indexOf(keywords[i]) !== -1){
+                            return "."+keywords[i];
+                        }
+                    }
+                    if(contentType.indexOf("plain") !== -1){
+                        return ".txt";
+                    }
+                    if(contentType.indexOf("octet") !== -1){
+                        return ".bin";
+                    }
+                    var idx = contentType.indexOf("application/");
+                    if(idx !== -1){
+                        return "."+contentType.substr(idx+12);
+                    }
+                    return "";
+                }
+                ,hasBodyParam: function(params){
+                    var location;
+                    for(var i = 0;i<params.length;i++){
+                        if(!params[i].location){
+                            continue;
+                        }
+                        location = params[i].location.toLowerCase();
+                        if(location === 'body'){
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                ,getSchema: function(schema,state,schemaRequired){
+                    var tmp = schema.split("\n");
+                    var tokens = [];
+                    var fold = false;
+                    var fold_lv = 0;
+                    var current_lv;
+                    var close_token ="";
+                    var open_token ="";
+                    var comment = "";
+                    var comment_idx;
+                    var required
+                    for(var i = 0; i < tmp.length;i++){
+                        required = schemaRequired?schemaRequired[i]:false;
+                        if(fold){
+                            current_lv = tmp[i].length - tmp[i].replace(/^\s+/,"").length;
+                            var closeBraceRegex = new RegExp("^\s*"+close_token+"\s*,?$");
+                            if(fold_lv == current_lv && closeBraceRegex.exec(tmp[i].trim())){
+                                fold = false;
+                                close_token = "";
+                                continue;
+                            }
+                        }
+                        else{
+                            if(state.indexOf(i) !== -1){
+                                fold = true;
+                                open_token = tmp[i].trim();
+                                if(this.is_an_object_value_open_w_optional_comment(open_token)){
+                                    var match = /([[{])/.exec(tmp[i]);
+                                    open_token = match[1];
+                                    var brace_loc = match.index;
+                                    fold_lv = tmp[i].length - tmp[i].replace(/^\s+/,"").length;
+                                    close_token = open_token === "{" ? "}" : "]";
+                                    comment_idx = tmp[i].indexOf("/");
+                                    if(comment_idx > -1){
+                                        comment = tmp[i].substr(comment_idx).trim();
+                                        if(!comment.endsWith("*/")){
+                                            comment += " ... */";
+                                        }
+                                    }
+                                    else {
+                                        comment = '';
+                                    }
+                                    tokens.push({"val":tmp[i].substr(0,brace_loc)+open_token+"..."+close_token+" "+comment+"\n","line":i,"required":required});
+                                }
+                                else{
+                                    fold_lv = tmp[i].length - tmp[i].replace(/^\s+/,"").length;
+                                    open_token = open_token[0];
+                                    close_token = open_token === "{" ? "}" : "]";
+                                    comment_idx = tmp[i].indexOf("/");
+                                    if(comment_idx > -1){
+                                        comment = tmp[i].substr(comment_idx).trim();
+                                        if(!comment.endsWith("*/")){
+                                            comment += " ... */";
+                                        }
+                                    }
+                                    else {
+                                        comment = '';
+                                    }
+                                    tokens.push({"val":tmp[i].substr(0,fold_lv)+open_token+"..."+close_token+" "+comment+"\n","line":i,"required":required});
+                                }
+                            }
+                            else{
+                                tokens.push({"val":tmp[i]+"\n","line":i,"required":required});
+                            }
+                        }
+                    }
+                    return tokens;
+                }
+                ,schemaClicked: function(token,state){
+                    if(!this.isFoldable(token)){
+                        return;
+                    }
+
+                    var idx = state.indexOf(token.line);
+                    if(idx == -1){
+                        state.push(token.line);
+                    }
+                    else{
+                        state.splice(idx, 1);
+                    }
+                }
+                ,isFoldable: function(token){
+                    var txt = token.val.trim();
+                    return txt==='{' || txt==='[' || txt==='{...}' || txt==='[...]'
+                        || this.is_an_open_brace_with_comment(txt)
+                        || this.is_an_object_value_open_w_optional_comment(txt)
+                        || this.is_an_array_folded_with_comment(txt)
+                        || this.is_an_object_folded_with_comment(txt)
+                        || this.is_an_object_value_folded_w_optional_comment(txt);
+                }
+                , is_an_open_brace_with_comment: function(line){ return /[[{]\s*\/\*\s*[^\r\n]*\s*\*\//.exec(line);}
+                , is_an_object_value_open_w_optional_comment: function(line){ return /^"[\s\S]+"\s*:\s*[[{](\s*\/\*[^\r\n]*\s*\*\/)?/.exec(line);}
+                , is_an_array_folded_with_comment:  function(line){ return /\[\.\.\.\]\s*\/\*[^\r\n]*\s*\*\//.exec(line);}
+                , is_an_object_folded_with_comment: function(line){ return /\{\.\.\.\}\s*\/\*[^\r\n]*\s*\*\//.exec(line);}
+                , is_an_object_value_folded_w_optional_comment: function(line){ return /^"[\s\S]+"\s*:\s*(\[\.\.\.\])|(\{\.\.\.\})(\s*\/\*[^\r\n]*\s*\*\/)?/.exec(line);}
+
+                ,getFormParam: function(method){
+
+                    var result = [];
+                    var len = method.params.length;
+                    for(var i=0;i<len;i++){
+                        if(method.params[i].location === "formData" && method.params[i].type !== "file"){
+                            result.push(encodeURIComponent(method.params[i].name)+"="+encodeURIComponent(method.params[i].value));
+                        }
+                    }
+                    if(result.length == 0){
+                        return "";
+                    }
+                    return result.join("&");
+                }
+                , getRequestBody: function(method){
+
+                    var data = new FormData();
+                    var len = method.params.length;
+
+                    var noFileUpload = true;
+                    for(var i=0;i<len;i++){
+
+                        if(method.params[i].type === "file"){
+                            if(method.params[i].value.fileContent){
+                                for(var j=0;j<method.params[i].value.fileContent.length;j++){
+                                    data.append(encodeURIComponent(method.params[i].name+"[]"),method.params[i].value.fileContent[j]);
+                                    noFileUpload = false;
+                                }
+                            }
+                        }
+                        else if(method.params[i].location === "formData"){
+                            data.append(encodeURIComponent(method.params[i].name),encodeURIComponent(method.params[i].value)||"");
+                        }
+                    }
+
+                    return noFileUpload ? this.computeBody(method) : data;
+                }
+                ,getURL: function(method,path){
+                    if((method.request.choosen.scheme === "http" && this.port['http'] == 80) || (method.request.choosen.scheme === "https" && this.port['https'] == 443)){
+                        return method.request.choosen.scheme+'://'+ this.host + this.basePath + this.computePath(method,path) + this.getUrlParamString(method);
+                    }
+                    var port = this.port[method.request.choosen.scheme] ? ":" + this.port[method.request.choosen.scheme]  : "";
+                    return method.request.choosen.scheme+'://'+ this.host + port + this.basePath + this.computePath(method,path) + this.getUrlParamString(method);
+                }
+                ,getUrlParamString: function(method){
+
+                    var params = [];
+                    for(var i=0;i<method.params.length;i++){
+                        if(method.params[i].location.trim().toLowerCase() === "query"){
+                            params.push(method.params[i].name+'='+encodeURIComponent(method.params[i].value));
+                        }
+                    }
+
+                    if(params.length === 0){
+                        return "";
+                    }
+
+                    params = "?"+params.join("&");
+                    return params;
+                }
+                ,sendRequest: function(method,url,data,headers,api_idx,method_idx){
+
+                    var req = new XMLHttpRequest();
+                    req.open(method, url, true);
+                    var headersKeys = Object.keys(headers);
+                    for(var i = 0;i<headersKeys.length;i++){
+                        req.setRequestHeader(headersKeys[i], headers[headersKeys[i]])
+                    }
+                    req.responseType = "blob";
+                    var that = this;
+                    req.onload = function() {
+                        var blob = req.response;
+                        var contentType = req.getResponseHeader("Content-Type") || "";
+                        var result = "HTTP/1.1 "+req.status+" "+req.statusText+"\r\n";
+                        result += req.getAllResponseHeaders() + "\r\n";
+
+                        if(req.response.size < 128000){
+                            var reader = new FileReader();
+                            reader.onload = function() {
+                                that.apis[api_idx].methods[method_idx].request.choosen.result = result + reader.result;
+                            }
+                            reader.readAsText(blob);
+                        }
+                        else{
+                            that.apis[api_idx].methods[method_idx].request.choosen.result = result + "[Content Truncated]";
+                        }
+
+                        if(req.status>=200 && req.status < 300){
+
+                            that.apis[api_idx].methods[method_idx].request.choosen.rawResult = req.response;
+                            that.apis[api_idx].methods[method_idx].request.choosen.resultContentType = contentType;
+                            var url_segment = url.replace("//"+that.host,'').split("/");
+                            url_segment.shift();
+                            var filename = url_segment.join("-")+that.getFileExtension(contentType);
+                            that.apis[api_idx].methods[method_idx].request.choosen.resultFileName = filename;
+                        }
+                        else{
+                            that.apis[api_idx].methods[method_idx].request.choosen.rawResult = "";
+                            that.apis[api_idx].methods[method_idx].request.choosen.resultContentType = "";
+                            that.apis[api_idx].methods[method_idx].request.choosen.resultFileName = undefined;
+                            that.apis[api_idx].methods[method_idx].request.choosen.result = result;
+                        }
+
+                    };
+
+                    req.send(data);
+                    Materialize.toast('Request Sent', 1853);
+                }
+                , computePath: function(method,path){
+
+                    var params = method.params;
+                    var len = params.length;
+                    var new_path = path;
+                    for(var i=0;i<len;i++){
+                        if(!params[i].location){
+                            continue;
+                        }
+                        if(params[i].location.toLowerCase() === 'path' && params[i].value){
+                            new_path = new_path.split("{"+params[i].name+"}").join(params[i].value);
+                        }
+                    }
+                    return new_path;
+                }
+                , computeBody: function(method){
+
+                    var body = method.request.choosen.body;
+                    var formData = this.getFormParam(method);
+
+                    if(!body && !formData){
+                        return "";
+                    }
+                    else if(!body){
+                        return formData;
+                    }
+                    else{
+                        return formData+"\r\n"+body;
+                    }
+                }
+                , getThemeColor: function(method_name,withFontsColor){
+
+                    if(!withFontsColor){
+                        return this.appConfig.bgColor[method_name.toUpperCase()] || this.appConfig.bgColor["default"] || "blue" ;
+                    }
+
+                    var tmp = this.appConfig.bgColor[method_name.toUpperCase()] || this.appConfig.bgColor["default"] || "blue" ;
+                    switch(tmp){
+                        case "yellow":
+                        case "lime":
+                        case "white":
+                            return "black-text " + tmp;
+                        default:
+                            return "white-text " + tmp;
+                    }
+                }
+                , setFilename: function(e,model){
+                    var filenames = [];
+                    var files = [];
+                    for(var i = 0;i<e.target.files.length;i++){
+                        filenames.push(e.target.files[i].name);
+                        files.push(e.target.files[i]);
+                    }
+                    model.value = {
+                        filenames: filenames.sort().join(", ")
+                        ,fileContent: files
+                    }
+                }
+                , toggleConsole: function(event){
+
+                    if(event){
+                      var keycode = event.keyCode;
+                      if(keycode !== 192 || !event.ctrlKey){
+                          return;
+                      }
+                    }
+
+                    this.appData.showConsole = !this.appData.showConsole;
+                    if(this.appData.showConsole){
+                      var self = this;
+                      Vue.nextTick(function () {
+                        self.$refs.txtConsole.focus();
+                      });
+                    }
+                }
+                , autoComplete: function(){
+                    if(!this.appData.console){
+                        return;
+                    }
+
+                    if("add header -g".startsWith(this.appData.console)){
+                        this.appData.console = "add header -g ";
+                    }
+
+                    if("remove header -g".startsWith(this.appData.console)){
+                        this.appData.console = "remove header -g ";
+                    }
+
+                    if("clear".startsWith(this.appData.console)){
+                        this.appData.console = "clear";
+                    }
+                }
+                , parseCmd: function(){
+                    var tokens = this.appData.console.split(" ");
+                    if(tokens[0] === "add"){
+                        if(tokens[1] === "header"){
+                            if(tokens[2] === "-g"){
+                                var header = tokens[3];
+                                var val = tokens.length > 5 ? tokens.slice(4).join(" ") : tokens[4];
+                                for(var i = 0;i<this.apis.length;i++){
+                                    var api = this.apis[i];
+                                    for(var j=0;j<api.methods.length;j++){
+                                        var method = api.methods[j];
+                                        Vue.set(method.request.choosen.headers,header,val);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(tokens[0] === "remove"){
+                        if(tokens[1] === "header"){
+                            if(tokens[2] === "-g"){
+                                var header = tokens[3];
+                                var val = tokens.length > 5 ? tokens.slice(4).join(" ") : tokens[4];
+                                for(var i = 0;i<this.apis.length;i++){
+                                    var api = this.apis[i];
+                                    for(var j=0;j<api.methods.length;j++){
+                                        var method = api.methods[j];
+                                        delete method.request.choosen.headers[header];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(tokens[0] === "clear"){
+                        this.appData.console = "";
+                        this.appData.consoleLogs = [];
+                    }
+                    else{
+                        this.appData.consoleLogs.push("> "+this.appData.console);
+                    }
+                    this.appData.console = "";
+                }
+                , tokenizeSearchText: function(txt){
+                    var result = [];
+                    var in_quote = false;
+                    var start_idx = -1;
+                    var token;
+
+                    for(var i=0;i<txt.length;i++){
+                       
+                        if(txt[i] === " ") {
+                            
+                            if(in_quote) {
+                                continue;
+                            }
+                            if (start_idx === -1) {
+                                continue;
+                            }
+                            result.push(txt.substr(start_idx,i-start_idx));
+                            start_idx = -1;
+                        }
+                        else if(txt[i] === '"') {
+                            if(in_quote){
+                                result.push(txt.substr(start_idx,i-start_idx+1));
+                                start_idx = -1;
+                            }
+                            else {
+                                start_idx = i;
+                            }
+                            in_quote = !in_quote;
+                        }
+                        else if(start_idx === -1 && txt[i] !== " "){
+                            start_idx = i;
+                        }
+                    }
+                    if(start_idx != -1){
+                        token = txt.substr(start_idx).trim();
+                        if(token) {
+                            result.push(token);
+                        }
+                    }
+                    return result;
+                }
+                , escapeHtml: function(dirty) {
+                    return dirty
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;");
+                }
+                , syntaxHighlight: function(input, required) {
+                    var line = this.escapeHtml(input.val);
+                    var ch;
+                    var result = line;
+                    required = input.required ? "schema-required ":"";
+                    for(var i = 0;i<line.length;i++) {
+                        if(line[i]===" "){
+                            continue;
+                        }
+    
+                        ch = line[i];
+                        if(ch === '"') {
+                            tmp = this.tokenizeKeyValLine(line,i);
+                            key = undefined;
+                            colon = undefined;
+                            value = undefined;
+                            comma = undefined;
+                            comment = undefined;
+                            if(tmp.length === 5) {
+                                key = this.spanWrap(tmp[0],required+"schema-key");
+                                colon = tmp[1];
+                                value = (tmp[2] === " [...]" 
+                                    || tmp[2] === " ["
+                                    || tmp[2] === " {...}"
+                                    || tmp[2] === " {"
+                                ) ? tmp[2] : this.spanWrap(tmp[2],"schema-val");
+                                comma = tmp[3];
+                                comment = this.spanWrap(tmp[4].replace(/\n*$/g,""),"schema-comment");
+                            }
+                            else if(tmp.length === 4) {
+                                if(tmp[3] === ","){
+                                    comma = tmp[3];
+                                }
+                                else {
+                                    comment = this.spanWrap(tmp[3].replace(/\n*$/g,""),"schema-comment");
+                                }
+                                key = this.spanWrap(tmp[0],required+"schema-key");
+                                colon = tmp[1];
+                                value = (tmp[2] === " [...]" 
+                                    || tmp[2] === " ["
+                                    || tmp[2] === " {...}"
+                                    || tmp[2] === " {"
+                                ) ? tmp[2] : this.spanWrap(tmp[2],"schema-val");
+                            }
+                            else if(tmp.length === 3) {
+                                if(tmp[2][0] === "/"){
+                                    comment = this.spanWrap(tmp[2].replace(/\n*$/g,""),"schema-comment");
+                                    comma = tmp[1];
+                                    value = this.spanWrap(tmp[0],"schema-val");
+                                }
+                                else {
+                                    key = this.spanWrap(tmp[0],required+"schema-key");
+                                    colon = tmp[1]
+                                    value = (tmp[2] === " [...]" 
+                                        || tmp[2] === " ["
+                                        || tmp[2] === " {...}"
+                                        || tmp[2] === " {"
+                                    ) ? tmp[2] : this.spanWrap(tmp[2],"schema-val");
+                                }
+                            }
+                            else if(tmp.length === 2) {
+                                if(tmp[1] === ","){
+                                    value = this.spanWrap(tmp[0],"schema-val");
+                                    comma = tmp[1];
+                                }
+                                else {
+                                    value = this.spanWrap(tmp[0],"schema-val");
+                                    comment = this.spanWrap(tmp[1].replace(/\n*$/g,""),"schema-comment");
+                                }
+                            }
+                            else if(tmp.length === 1){
+                                value = this.spanWrap(tmp[0],"schema-val");
+                            }
+                            
+                            result = [key,colon,value,comma,comment].join('')+"\n";
+                            break;
+                        }
+                        else if(ch === '{' || ch === '[') {
+                            if(line.endsWith(ch+"\n") && i === line.length-2) {
+                                result = line;
+                                break;
+                            }
+    
+                            if(line[i+1] === ".") {
+    
+                                if(line.length > i+5) {
+                                    result = line.substr(0,i+5)+this.spanWrap(line.substr(i+5),"schema-comment");
+                                }
+                                else {
+                                    result = line;
+                                }
+                                break;
+                            }
+                            if(ch === "{"){
+                                comment = this.spanWrap(line.substr(i+1),"schema-comment");
+                                result = line.substr(0,i+1)+comment;
+                                break;
+                            }
+                            //array inline syntax [x1,x2,...,xn] /* comment */
+                            var close_idx = line.indexOf("]",i+1);
+                            var vals = line.substr(1,close_idx-1).split(",");
+                            for(var j = 0;j<vals.length;j++){
+                                vals[j] = this.spanWrap(vals[j],"schema-val");
+                            }
+                            comment = "";
+                            if(line.length > close_idx+2){
+                                comment = this.spanWrap(line.substr(close_idx+1));
+                            }
+                            result = `[${vals.join(", ")}]${comment}`;
+                            break;
+                        }
+                        else if(ch === '*') {
+                            result = this.spanWrap(line,"schema-comment");
+                            break;
+                        }
+                    }
+                    return result;
+                }
+                , spanWrap: function(txt,className) {
+                    return `<span class="${className}">${txt}</span>`;
+                }
+                , tokenizeKeyValLine: function(line,firstCharIdx) {
+                    var result = [];
+                    var in_quote = true;
+                    var start_idx = 0;
+                    for (var i = firstCharIdx + 1; i < line.length; i++) {
+    
+                        if (line[i] === '"') {
+                            if (in_quote) {
+                                if (line[i - 1] !== "\\") {
+                                    result.push(line.substr(start_idx, i - start_idx + 1));
+                                    in_quote = false;
+                                    start_idx = i + 1;
+                                }
+                            }
+                            else {
+                                in_quote = true;
+                            }
+                        }
+                        else if (!in_quote) {
+                            if ((line[i] === "{" || line[i] === "[") && line[i+1] === "."){
+                                result.push(line.substr(start_idx, i - start_idx + 5));
+                                start_idx = i + 5;
+                                i += 4;
+                            }
+                            else if (line[i] === ":" || line[i] === ","
+                                || line[i] === "{" || line[i] === "}"
+                                || line[i] === "[" || line[i] === "]") {
+                                result.push(line.substr(start_idx, i - start_idx + 1));
+                                start_idx = i + 1;
+                            }
+                            else if (line[i] === "/") {
+                                result.push(line.substr(start_idx));
+                                break;
+                            }
+                        }
+                    }
+                    return result;
+                }
+                , clearSearch: function() {
+                    this.appData.search = "";
+                    this.filterByTag = "";
+                }
+            }
+            , data: {
+   "name": "dev-swift-sprinter-rest-api-swift",
+   "summary": "Product API - Demo",
+   "metadata": {
+      "Version": "2020-05-25T15:42:57Z",
+      "Contact": "Andrea Scuderi",
+      "License": "Apache 2.0",
+      "Base URL": "<BASE_URL>/dev"
+   },
+   "host": "<BASE_URL>",
+   "port": {
+      "http": 80,
+      "https": 443
+   },
+   "basePath": "/dev",
+   "currentHost": location.host || "null",
+   "currentScheme": location.protocol.replace(":",""),
+   "appConfig": {
+      "bgColor": {
+         "default": "blue"
+      },
+      "showDevPlayground": true,
+      "showNav": true,
+      "fixedNav": false
+   },
+   "appData": {
+      "search": "",
+      "console": "",
+      "consoleLogs": [],
+      "showConsole": false
+   },
+   "apis": [
+      {
+         "path": "/products",
+         "visible": true,
+         "showMe": true,
+         "methods": [
+            {
+               "name": "GET",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "GET"
+               ],
+               "summary": "",
+               "desc": "List Products",
+               "params": [],
+               "responses": [
+                  {
+                     "code": "200",
+                     "desc": "OK",
+                     "schema": "[\n   {\n      \"sku\": \"string\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"createdAt\": \"string\",\n      \"updatedAt\": \"string\"\n   }\n]",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            },
+            {
+               "name": "POST",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "POST"
+               ],
+               "summary": "",
+               "desc": "Create Product",
+               "params": [
+                  {
+                     "name": "body",
+                     "location": "body",
+                     "desc": "",
+                     "schema": "{\n   \"sku\": \"string\",\n   \"name\": \"string\",\n   \"description\": \"string\",\n   \"createdAt\": \"string\",\n   \"updatedAt\": \"string\"\n}",
+                     "schemaState": [],
+                     "schemaRequired": [
+                        false,
+                        true,
+                        true,
+                        true,
+                        false,
+                        false,
+                        false
+                     ],
+                     "value": "",
+                     "type": "text"
+                  }
+               ],
+               "responses": [
+                  {
+                     "code": "201",
+                     "desc": "Created",
+                     "schema": "{\n   \"sku\": \"string\",\n   \"name\": \"string\",\n   \"description\": \"string\",\n   \"createdAt\": \"string\",\n   \"updatedAt\": \"string\"\n}",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            },
+            {
+               "name": "PUT",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "PUT"
+               ],
+               "summary": "",
+               "desc": "Update Product",
+               "params": [
+                  {
+                     "name": "body",
+                     "location": "body",
+                     "desc": "",
+                     "schema": "{\n   \"sku\": \"string\",\n   \"name\": \"string\",\n   \"description\": \"string\",\n   \"createdAt\": \"string\",\n   \"updatedAt\": \"string\"\n}",
+                     "schemaState": [],
+                     "schemaRequired": [
+                        false,
+                        true,
+                        true,
+                        true,
+                        false,
+                        false,
+                        false
+                     ],
+                     "value": "",
+                     "type": "text"
+                  }
+               ],
+               "responses": [
+                  {
+                     "code": "200",
+                     "desc": "OK",
+                     "schema": "{\n   \"sku\": \"string\",\n   \"name\": \"string\",\n   \"description\": \"string\",\n   \"createdAt\": \"string\",\n   \"updatedAt\": \"string\"\n}",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            },
+            {
+               "name": "OPTIONS",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "OPTIONS"
+               ],
+               "summary": "",
+               "desc": "",
+               "params": [],
+               "responses": [
+                  {
+                     "code": "200",
+                     "desc": "200 response",
+                     "schema": "",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            }
+         ]
+      },
+      {
+         "path": "/products/{sku}",
+         "visible": true,
+         "showMe": true,
+         "methods": [
+            {
+               "name": "GET",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "GET"
+               ],
+               "summary": "",
+               "desc": "Get Product",
+               "params": [
+                  {
+                     "name": "sku",
+                     "location": "path",
+                     "required": true,
+                     "schema": "string",
+                     "schemaState": [],
+                     "schemaRequired": [
+                        true
+                     ],
+                     "value": ""
+                  }
+               ],
+               "responses": [
+                  {
+                     "code": "200",
+                     "desc": "OK",
+                     "schema": "{\n   \"sku\": \"string\",\n   \"name\": \"string\",\n   \"description\": \"string\",\n   \"createdAt\": \"string\",\n   \"updatedAt\": \"string\"\n}",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            },
+            {
+               "name": "DELETE",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "DELETE"
+               ],
+               "summary": "",
+               "desc": "Delete Product",
+               "params": [
+                  {
+                     "name": "sku",
+                     "location": "path",
+                     "required": true,
+                     "schema": "string",
+                     "schemaState": [],
+                     "schemaRequired": [
+                        true
+                     ],
+                     "value": ""
+                  }
+               ],
+               "responses": [
+                  {
+                     "code": "204",
+                     "desc": "No Content",
+                     "schema": "{\n}",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            },
+            {
+               "name": "OPTIONS",
+               "visible": true,
+               "tags": [
+                  "product",
+                  "OPTIONS"
+               ],
+               "summary": "",
+               "desc": "",
+               "params": [
+                  {
+                     "name": "sku",
+                     "location": "path",
+                     "required": true,
+                     "schema": "string",
+                     "schemaState": [],
+                     "schemaRequired": [
+                        true
+                     ],
+                     "value": ""
+                  }
+               ],
+               "responses": [
+                  {
+                     "code": "200",
+                     "desc": "200 response",
+                     "schema": "",
+                     "schemaState": []
+                  }
+               ],
+               "examples": {},
+               "request": {
+                  "schemes": [
+                     "https"
+                  ],
+                  "headers": [],
+                  "choosen": {
+                     "scheme": "https",
+                     "headers": {},
+                     "body": "",
+                     "headerName": "",
+                     "headerValue": "",
+                     "result": ""
+                  }
+               },
+               "showTool": false,
+               "showMe": true
+            }
+         ]
+      }
+   ]
+}
+            , mounted: function(){
+                document.body.addEventListener('keyup', this.toggleConsole);
+            }
+        };
+        var vm = new Vue(context);
+        document.title = context.data.name;
+
+        $(function(){
+            function fixDiv() {
+                var consolePanel = $('#consolePanel');
+                consolePanel.css({
+                    'position': 'fixed',
+                    'bottom': '0px'
+                });
+          }
+          $(window).scroll(fixDiv);
+          fixDiv();
+          $("table").colResizable({
+              liveDrag:true
+              ,gripInnerHtml:"<div class='grip'></div>"
+              ,draggingClass:"dragging"
+          });
+        });
+        var jsonPreview = '<!--jsonViewer | https://github.com/twskj/jsonViewer | License: MIT--><!DOCTYPE html><html lang=en><title>_title_<\/title><meta charset=UTF-8><meta content="width=device-width,initial-scale=1"name=viewport><style>@charset "UTF-8";.json-view pre{display:inline}.json-view{position:relative}.json-view .collapser{width:20px;height:18px;display:block;position:absolute;left:-1.7em;top:-.2em;z-index:5;background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAD1JREFUeNpiYGBgOADE%2F3Hgw0DM4IRHgSsDFOzFInmMAQnY49ONzZRjDFiADT7dMLALiE8y4AGW6LoBAgwAuIkf%2F%2FB7O9sAAAAASUVORK5CYII%3D);background-repeat:no-repeat;background-position:center center;opacity:.5;cursor:pointer}.json-view .collapsed{-ms-transform:rotate(-90deg);-moz-transform:rotate(-90deg);-khtml-transform:rotate(-90deg);-webkit-transform:rotate(-90deg);-o-transform:rotate(-90deg);transform:rotate(-90deg)}.json-view .bl{display:block;padding-left:20px;margin-left:-20px;position:relative}.json-view{font-family:monospace}.json-view ul{list-style-type:none;padding-left:2em;border-left:1px dotted;margin:.3em}.json-view ul li{position:relative}.json-view .comments,.json-view .dots{display:none;-moz-user-select:none;-ms-user-select:none;-khtml-user-select:none;-webkit-user-select:none;-o-user-select:none;user-select:none}.json-view .comments{padding-left:.8em;font-style:italic;color:#888}.json-view .bool,.json-view .null,.json-view .num,.json-view .undef{font-weight:700;color:#1a01cc}.json-view .str{color:#800}<\/style><div id=d><\/div><script>function createElement(e,t,n){var a=document.createElement(e);t=t||"",t=t.split(" ");for(var l=0;l<t.length;l++)t[l]&&a.classList.add(t[l]);return a.innerHTML=htmlEncode(n||""),a}function createTextElement(e,t,n){var a=document.createTextNode(e);return a["class"]=t,a.innerHTML=htmlEncode(n||""),a}function collapser(e){var t=createElement("span","collapser");return t.addEventListener("click",function(e){var t=e.target;t.classList.toggle("collapsed");for(var n=t.parentNode,a=null,l=0;l<n.childNodes.length;l++){var r=n.childNodes[l];if(r.classList&&r.classList.contains("block")){a=n.childNodes[l];break}}var c=a.getElementsByTagName("ul")[0];if(t.classList.contains("collapsed")){if(c.style.display="none",a)for(var l=0;l<a.childNodes.length;l++)(a.childNodes[l].classList.contains("dots")||a.childNodes[l].classList.contains("comments"))&&(a.childNodes[l].style.display="inline")}else if(c.style.display="block",a)for(var l=0;l<a.childNodes.length;l++)(a.childNodes[l].classList.contains("dots")||a.childNodes[l].classList.contains("comments"))&&(a.childNodes[l].style.display="none")}),e&&t.classList.add("collapsed"),t}function htmlEncode(e){return e.toString()?e.toString().replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"):""}function getType(e){return{}.toString.call(e).split(" ")[1].slice(0,-1).toLowerCase()}function isEmpty(e){return Array.isArray(e)?0==e.length:0===Object.keys(e).length&&e.constructor===Object}function genObjOrArrayBlock(e,t,n){var a=e?"{":"[",l=e?"}":"]";n||(n=0);var r=createElement("span","block"),c=Object.keys(t).length;if(r.appendChild(createElement("span","b",a)),!c){var s=document.createTextNode(" ");return r.appendChild(s),r.appendChild(createElement("span","b",l)),r}for(var i=createElement("ul","obj collapsible level"+n),d=Object.keys(t),o=0;o<d.length;o++){c--;var p=createElement("li");-1===["object","array"].indexOf(getType(t[d[o]]))||isEmpty(t[d[o]])||p.appendChild(collapser()),p.appendChild(createElement("span","q","\\"")),p.appendChild(createTextElement(d[o])),p.appendChild(createElement("span","q","\\"")),p.appendChild(createTextElement(": ")),p.appendChild(genBlock(t[d[o]],n+1)),c>0&&p.appendChild(createTextElement(",")),i.appendChild(p)}return r.appendChild(i),r.appendChild(createElement("span","dots","...")),r.appendChild(createElement("span","b",l)),1===Object.keys(t).length?r.appendChild(createElement("span","comments","// 1 item")):r.appendChild(createElement("span","comments","// "+Object.keys(t).length+" items")),r}function genBlock(e,t){var n=getType(e);switch(n){case"object":return genObjOrArrayBlock(!0,e,t);case"array":return genObjOrArrayBlock(!1,e,t);case"string":var a=createElement("span");if(a.appendChild(createElement("span","q","\\"")),e=htmlEncode(e),/^(http|https|file):\\/\\/[^\\s]+$/i.test(e)){var l=createElement("a");return l.href=e,l.innerHTML=e,a.appendChild(l),a.appendChild(createElement("span","q","\\"")),a}var r=/\\n/g,c=r.test(e)?"pre":"span",s=createElement(c,"str",e);return a.appendChild(s),a.appendChild(createElement("span","q","\\"")),a;case"number":return createElement("span","num",e.toString());case"undefined":return createElement("span","undef","undefined");case"null":return createElement("span","null","null");case"boolean":return createElement("span","bool",e.toString())}}function formatter(e){return genBlock(e)}function addJsonViewer(e,t){if("string"==typeof t)try{t=JSON.parse(t)}catch(n){return void console.log(n)}var a=createElement("div","json-view");e.appendChild(a),a.appendChild(formatter(t))}<\/script><script>var el=document.getElementById("d");addJsonViewer(el,_data_)<\/script><\/body><\/html>';
+    </script>
+</body>
+</html>
