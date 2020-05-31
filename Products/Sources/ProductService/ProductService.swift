@@ -1,4 +1,4 @@
-//    Copyright 2019 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ public enum APIError: Error {
     case invalidItem
     case tableNameNotFound
     case invalidRequest
+    case handlerNotFound
 }
 
 extension Date {

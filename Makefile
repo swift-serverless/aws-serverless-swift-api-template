@@ -14,13 +14,13 @@
 
 # Use this tag to build a customized local image
 
-# SWIFT_VERSION?=nightly-master-amazonlinux2
-# LAYER_VERSION?=nightly-master-amazonlinux2
-# DOCKER_OS?=amazonlinux2
+SWIFT_VERSION?=nightly-master-amazonlinux2
+LAYER_VERSION?=nightly-master-amazonlinux2
+DOCKER_OS?=amazonlinux2
 
-SWIFT_VERSION?=5.2.3-bionic
-LAYER_VERSION?=5-2-3-bionic
-DOCKER_OS=bionic
+# SWIFT_VERSION?=5.2.3-bionic
+# LAYER_VERSION?=5-2-3-bionic
+# DOCKER_OS=bionic
 
 DOCKER_TAG=nio-swift:$(SWIFT_VERSION)
 SWIFT_DOCKER_IMAGE=$(DOCKER_TAG)
