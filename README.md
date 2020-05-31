@@ -4,7 +4,7 @@
 
 This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as development language.
 
-## Swift-Sprinter Product API Example
+## Product API Example
 
 The example shows how to build a Rest API based on a `Product` swift class.
 
