@@ -39,7 +39,7 @@ struct EmptyResponse: Codable {
 
 struct ProductLambda: LambdaHandler {
     
-    typealias In = APIGateway.Request
+    typealias In = APIGateway.SimpleRequest
     typealias Out = APIGateway.Response
     
     let dbTimeout:Int64 = 30
@@ -97,7 +97,7 @@ struct ProductLambda: LambdaHandler {
         logger.info("ProductService")
     }
 
-    func handle(context: Lambda.Context, payload: APIGateway.Request, callback: @escaping (Result<APIGateway.Response, Error>) -> Void) {
+    func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest, callback: @escaping (Result<APIGateway.Response, Error>) -> Void) {
         let _ = ProductLambdaHandler(service: service, operation: operation).handle(context: context, payload: payload)
             .always { (result) in
                 callback(result)

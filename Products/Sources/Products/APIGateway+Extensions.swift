@@ -16,14 +16,19 @@ import Foundation
 import AWSLambdaEvents
 import ProductService
 
-public extension APIGateway.Request {
-    func object<T: Codable>() throws -> T {
-        let decoder = JSONDecoder()
-        guard let body = self.body,
-            let dataBody = body.data(using: .utf8) else {
-                throw APIError.invalidRequest
+public extension APIGateway {
+    struct SimpleRequest: Codable {
+        public let body: String?
+        public let pathParameters: [String: String]?
+        
+        public func object<T: Codable>() throws -> T {
+            let decoder = JSONDecoder()
+            guard let body = self.body,
+                let dataBody = body.data(using: .utf8) else {
+                    throw APIError.invalidRequest
+            }
+            return try decoder.decode(T.self, from: dataBody)
         }
-        return try decoder.decode(T.self, from: dataBody)
     }
 }
 

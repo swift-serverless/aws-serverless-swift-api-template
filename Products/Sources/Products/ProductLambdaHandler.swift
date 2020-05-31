@@ -24,13 +24,13 @@ import AWSLambdaEvents
 
 struct ProductLambdaHandler: EventLoopLambdaHandler {
     
-    typealias In = APIGateway.Request
+    typealias In = APIGateway.SimpleRequest
     typealias Out = APIGateway.Response
     
     let service: ProductService
     let operation: Operation
     
-    func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<APIGateway.Response> {
+    func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<APIGateway.Response> {
     
         switch operation {
         case .create:
@@ -42,7 +42,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
                     let value = APIGateway.Response(with: result, statusCode: .created)
                     return context.eventLoop.makeSucceededFuture(value)
                 case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .badRequest)
+                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
                     return context.eventLoop.makeSucceededFuture(value)
                 }
             }
@@ -118,7 +118,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
             self.service = service
         }
 
-        func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<Result<Product,Error>> {
+        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
                     
             guard let product: Product = try? payload.object() else {
                 let error = APIError.invalidRequest
@@ -140,7 +140,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
             self.service = service
         }
 
-        func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<Result<Product,Error>> {
+        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
             
             guard let sku = payload.pathParameters?["sku"] else {
                  let error = APIError.invalidRequest
@@ -163,7 +163,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
             self.service = service
         }
 
-        func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<Result<Product,Error>> {
+        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
             
             guard let product: Product = try? payload.object() else {
                 let error = APIError.invalidRequest
@@ -185,7 +185,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
             self.service = service
         }
 
-        func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<Result<EmptyResponse,Error>> {
+        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<EmptyResponse,Error>> {
             
             guard let sku = payload.pathParameters?["sku"] else {
                  let error = APIError.invalidRequest
@@ -207,7 +207,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
             self.service = service
         }
 
-        func handle(context: Lambda.Context, payload: APIGateway.Request) -> EventLoopFuture<Result<[Product],Error>> {
+        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<[Product],Error>> {
             
             let future = service.listItems()
                 .flatMapThrowing { data -> Result<[Product],Error> in

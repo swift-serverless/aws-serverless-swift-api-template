@@ -17,6 +17,7 @@ public struct Product: Codable {
     public var updatedAt: String?
 }
 ```
+![](images/postman.png)
 
 ## API Definition
 
@@ -36,7 +37,9 @@ More details on the API are described in [swagger.json](swagger.json).
 
 The file can be imported in popular tool such as PostMan.
 
-The full [HTML documentation](swagger-doc.html) has been generated using [pretty-swag](https://twskj.github.io/pretty-swag/)
+Be sure to update the `"host": "<BASE_URL>"` with the url provided during the deployment.
+
+The full `swagger-doc.html` has been generated using [pretty-swag](https://twskj.github.io/pretty-swag/)
 
 ## Serverless architecture
 
@@ -51,12 +54,12 @@ Advantages:
 - Auto-Scaling
 - DevOps
 
-## Application
+## REST API Application
 
-The application uses [Swift-Sprinter](https://github.com/swift-sprinter/aws-lambda-swift-sprinter) as AWS Custom Lambda Runtime and acts as a presentation layer of the DynamoDB content via Web.
+The application uses [swift-aws-lambda-runtime](https://github.com/swift-server/swift-aws-lambda-runtime/) as AWS Custom Lambda Runtime and acts as a presentation layer of the DynamoDB content providing a REST API.
 
 The following frameworks are used:
-- [aws-lambda-swift-sprinter-nio-plugin](https://github.com/swift-sprinter/aws-lambda-swift-sprinter-nio-plugin): Implements the AWS Custom Runtime usin Swift NIO.
+- [swift-aws-lambda-runtime](https://github.com/swift-server/swift-aws-lambda-runtime/): Implements the AWS Custom Runtime usin Swift NIO.
 - [aws-sdk-swift](https://github.com/swift-aws/aws-sdk-swift): Interacts with DynamoDB
 
 ## Requirements
@@ -94,12 +97,16 @@ Use the following command to build the code before using the serverless commands
 ./build.sh
 ```
 
+![](images/build.png)
+
 ## Deploy
 
 Deploy the full solution to your AWS using Serverless:
 ```
 ./deploy.sh
 ```
+
+![](images/deploy.png)
 
 After the deployment is completed, the URL of the website is provided by the Serverless framework.
 
@@ -110,9 +117,13 @@ Rebuild the code and update the Lambda to your AWS using Serverless:
 ./update.sh
 ```
 
+![](images/update.png)
+
 ## Remove
 
 To remove the deployment use:
 ```
 serverless remove
 ```
+
+![](images/remove.png)
