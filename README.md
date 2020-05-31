@@ -1,4 +1,4 @@
-# AWS Serverless Swift-Sprinter API Template
+# AWS Serverless Swift API Template
 
 [![Swift 5.2.3](https://img.shields.io/badge/Swift-5.2.3-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
 
@@ -33,13 +33,13 @@ The API implements the following schema:
     -> GET - Get Product
 ```
 
-More details on the API are described in [swagger.json](swagger.json).
+More details of the API are described in [swagger.json](swagger.json).
 
 The file can be imported in popular tool such as PostMan.
 
 Be sure to update the `"host": "<BASE_URL>"` with the url provided during the deployment.
 
-The full `swagger-doc.html` has been generated using [pretty-swag](https://twskj.github.io/pretty-swag/)
+The full `swagger-doc.html` has been generated using `pretty-swag`
 
 ## Serverless architecture
 
