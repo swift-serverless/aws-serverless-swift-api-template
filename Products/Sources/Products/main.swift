@@ -49,12 +49,19 @@ let timeout = HTTPClient.Configuration.Timeout(connect: lambdaRuntimeTimeout,
 
 let configuration = HTTPClient.Configuration(timeout: timeout)
 let awsClient = HTTPClient(eventLoopGroupProvider: .createNew, configuration: configuration)
+
+logger.info("awsClient")
+
 let db = DynamoDB(region: region, httpClientProvider: .shared(awsClient))
+
+logger.info("DynamoDB")
 
 let service = ProductService(
     db: db,
     tableName: tableName
 )
+
+logger.info("ProductService")
 
 struct EmptyResponse: Codable {
     
@@ -80,8 +87,12 @@ extension Lambda {
     }
 }
 
-switch Lambda.env("_HANDLER") {
-case "createHandler":
+let handler: String = Lambda.env("_HANDLER") ?? ""
+
+logger.info("\(handler)")
+
+switch handler {
+case "build/Products.create":
     
     Lambda.run { (event: APIGatewayProxySimpleEvent, context) throws -> EventLoopFuture<APIGatewayProxyResult<Product>> in
         guard let product: Product = try? event.object() else {
@@ -95,7 +106,7 @@ case "createHandler":
         return future
     }
     
-case "readHandler":
+case "build/Products.read":
     
     Lambda.run { (event: APIGatewayProxySimpleEvent, context) throws -> EventLoopFuture<APIGatewayProxyResult<Product>> in
         guard let sku = event.pathParameters?["sku"] else {
@@ -109,7 +120,7 @@ case "readHandler":
         return future
     }
     
-case "updateHandler":
+case "build/Products.update":
     Lambda.run { (event: APIGatewayProxySimpleEvent, context) throws -> EventLoopFuture<APIGatewayProxyResult<Product>> in
         guard let product: Product = try? event.object() else {
             throw APIError.invalidRequest
@@ -121,7 +132,7 @@ case "updateHandler":
         return future
     }
     
-case "deleteHandler":
+case "build/Products.delete":
     
     Lambda.run { (event: APIGatewayProxySimpleEvent, context) throws -> EventLoopFuture<APIGatewayProxyResult<EmptyResponse>>  in
         guard let sku = event.pathParameters?["sku"] else {
@@ -134,7 +145,7 @@ case "deleteHandler":
         return future
     }
     
-case "listHandler":
+case "build/Products.list":
     
     Lambda.run { (event: APIGatewayProxySimpleEvent, context) throws -> EventLoopFuture<APIGatewayProxyResult<[Product]>>  in
         let future = service.listItems()
@@ -149,5 +160,6 @@ case "listHandler":
     }
 
 default:
+    logger.error("preconditionFailure")
     preconditionFailure("Unexpected handler name: \(Lambda.env("_HANDLER") ?? "unknown")")
 }
