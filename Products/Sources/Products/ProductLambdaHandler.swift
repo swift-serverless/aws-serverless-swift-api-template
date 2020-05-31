@@ -56,7 +56,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
                     let value = APIGateway.Response(with: result, statusCode: .ok)
                     return context.eventLoop.makeSucceededFuture(value)
                 case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
+                    let value = APIGateway.Response(with: error, statusCode: .notFound)
                     return context.eventLoop.makeSucceededFuture(value)
                 }
             }
@@ -70,7 +70,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
                     let value = APIGateway.Response(with: result, statusCode: .ok)
                     return context.eventLoop.makeSucceededFuture(value)
                 case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
+                    let value = APIGateway.Response(with: error, statusCode: .notFound)
                     return context.eventLoop.makeSucceededFuture(value)
                 }
             }
@@ -84,7 +84,7 @@ struct ProductLambdaHandler: EventLoopLambdaHandler {
                     let value = APIGateway.Response(with: result, statusCode: .ok)
                     return context.eventLoop.makeSucceededFuture(value)
                 case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
+                    let value = APIGateway.Response(with: error, statusCode: .notFound)
                     return context.eventLoop.makeSucceededFuture(value)
                 }
             }
