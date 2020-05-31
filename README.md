@@ -70,8 +70,8 @@ The following frameworks are used:
 - Clone this repository. From the command line type:
 
 ```console
-git clone https://github.com/swift-sprinter/aws-serverless-swift-sprinter-web-template
-cd aws-serverless-swift-sprinter-web-template
+git clone https://github.com/swift-sprinter/aws-serverless-swift-api-template.git
+cd aws-serverless-swift-api-template
 ```
 - Ensure you can run `make`:
 
