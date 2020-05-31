@@ -1,10 +1,13 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "swift-rest-api",
+    platforms: [
+        .macOS(.v10_13),
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .executable(name: "Products", targets: ["Products"]),
@@ -14,7 +17,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-sprinter/aws-lambda-swift-sprinter-nio-plugin", from: "1.0.0"),
+        .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "0.1.0"),
         .package(url: "https://github.com/swift-aws/aws-sdk-swift.git", from: "5.0.0-alpha.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
@@ -25,16 +28,20 @@ let package = Package(
             name: "ProductService",
              dependencies: [
                  .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
-                 "Logging"
+                 .product(name: "Logging", package: "swift-log")
             ]
         ),
         .target(
             name: "Products",
-             dependencies: ["LambdaSwiftSprinterNioPlugin", "ProductService"]
+             dependencies: [
+                 .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
+                 .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-runtime"),
+                "ProductService"
+            ]
         ),
         .testTarget(
             name: "ProductServiceTests",
-            dependencies: ["ProductService"]
+            dependencies: ["Products"]
         ),
     ]
 )

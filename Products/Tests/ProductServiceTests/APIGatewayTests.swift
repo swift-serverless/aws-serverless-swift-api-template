@@ -1,4 +1,4 @@
-//    Copyright 2019 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -12,8 +12,10 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-@testable import ProductService
+@testable import Products
 import XCTest
+import AWSLambdaEvents
+
 
 final class APIGatewayTests: XCTestCase {
     
@@ -23,22 +25,15 @@ final class APIGatewayTests: XCTestCase {
         
         let decoder = JSONDecoder()
         do {
-            let event = try decoder.decode(APIGatewayProxyEvent.self, from: data)
+            let event = try decoder.decode(APIGateway.Request.self, from: data)
             
             XCTAssertNotNil(event.headers)
             XCTAssertNotNil(event.body)
-            XCTAssertNotNil(event.pathParameters)
             XCTAssertNotNil(event.multiValueHeaders)
-            XCTAssertNotNil(event.multiValueQueryStringParameters)
-            XCTAssertNotNil(event.queryStringParameters)
-            XCTAssertNotNil(event.requestContext)
-            XCTAssertNotNil(event.stageVariables)
-            
         } catch {
             print(error)
             XCTFail()
         }
-        
     }
 
     static var allTests = [

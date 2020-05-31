@@ -14,8 +14,8 @@
 
 # Use this tag to build a customized local image
 
-SWIFT_VERSION?=nightly-amazonlinux2
-LAYER_VERSION?=nightly-amazonlinux2
+SWIFT_VERSION?=nightly-master-amazonlinux2
+LAYER_VERSION?=nightly-master-amazonlinux2
 DOCKER_OS?=amazonlinux2
 
 # SWIFT_VERSION?=5.2.3-bionic
@@ -69,7 +69,16 @@ build_lambda:
 			--volume "$(MOUNT_ROOT)/:/src" \
 			--workdir "/src/$(DOCKER_PROJECT_PATH)" \
 			$(SWIFT_DOCKER_IMAGE) \
-			/bin/bash -c "swift build --configuration $(SWIFT_CONFIGURATION)"
+			/bin/bash -c "swift build -c $(SWIFT_CONFIGURATION) -Xswiftc -g"
+
+docker_bash:
+	docker run \
+			-it \
+			--rm \
+			--volume "$(MOUNT_ROOT):/src" \
+			--workdir "/src/" \
+			$(SWIFT_DOCKER_IMAGE) \
+			/bin/bash
 
 cp_lambda_to_sls_build_local: create_build_directory
 	docker run \
@@ -90,7 +99,7 @@ package_lambda: create_build_directory build_lambda
 package_layer: create_build_directory
 	$(eval SHARED_LIBRARIES := $(shell cat docker/$(SWIFT_VERSION)/swift-shared-libraries.txt | tr '\n' ' '))
 	mkdir -p $(SHARED_LIBS_FOLDER)/lib
-ifeq '$(DOCKER_OS)' 'xenial'
+ifeq '$(DOCKER_OS)' 'bionic'
 	docker run \
 			--rm \
 			--volume "$(shell pwd)/:/src" \
