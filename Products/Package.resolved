@@ -14,18 +14,18 @@
         "package": "aws-sdk-swift",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift.git",
         "state": {
-          "branch": null,
-          "revision": "eeb30fac3d95a377d8c5bb4b33efed932061f42d",
-          "version": "5.0.0-alpha.3"
+          "branch": "dynamodb-codable",
+          "revision": "22a856b04d407ba4e41d73857316e8819dbfe81f",
+          "version": null
         }
       },
       {
         "package": "aws-sdk-swift-core",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift-core.git",
         "state": {
-          "branch": null,
-          "revision": "ccea4b98758e9e8bb907a4dc9bb15d01d8a3c736",
-          "version": "5.0.0-alpha.3.2"
+          "branch": "master",
+          "revision": "dbda01375cf58927e91f6fc1bd3a8567f2637b25",
+          "version": null
         }
       },
       {
@@ -47,21 +47,21 @@
         }
       },
       {
-        "package": "swift-crypto",
-        "repositoryURL": "https://github.com/apple/swift-crypto.git",
-        "state": {
-          "branch": null,
-          "revision": "9b9d1868601a199334da5d14f4ab2d37d4f8d0c5",
-          "version": "1.0.2"
-        }
-      },
-      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
           "branch": null,
           "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
           "version": "1.2.0"
+        }
+      },
+      {
+        "package": "swift-metrics",
+        "repositoryURL": "https://github.com/apple/swift-metrics.git",
+        "state": {
+          "branch": null,
+          "revision": "708b960b4605abb20bc55d65abf6bad607252200",
+          "version": "2.0.0"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "af46d9b58fafbb76f9b01177568d435a1b024f99",
-          "version": "2.6.2"
+          "revision": "f0b118d9af6c4e78bc4f3f4fbb464020172b0bf4",
+          "version": "2.7.5"
         }
       },
       {

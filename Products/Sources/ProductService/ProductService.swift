@@ -74,7 +74,7 @@ public class ProductService {
     
     public func readItem(key: String) -> EventLoopFuture<Product> {
         let input = DynamoDB.GetItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
         return db.getItem(input).flatMapThrowing { data -> Product in
@@ -97,11 +97,11 @@ public class ProductService {
                 "#createdAt": Product.Field.createdAt
             ],
             expressionAttributeValues: [
-                ":name": DynamoDB.AttributeValue(s: product.name),
-                ":description": DynamoDB.AttributeValue(s: product.description),
-                ":updatedAt": DynamoDB.AttributeValue(n: updatedAt)
+                ":name": DynamoDB.AttributeValue.s(product.name),
+                ":description": DynamoDB.AttributeValue.s(product.description),
+                ":updatedAt": DynamoDB.AttributeValue.n(updatedAt)
             ],
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: product.sku)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(product.sku)],
             returnValues: DynamoDB.ReturnValue.allNew,
             tableName: tableName,
             updateExpression: "SET #name = :name, #description = :description, #updatedAt = :updatedAt"
@@ -113,7 +113,7 @@ public class ProductService {
     
     public func deleteItem(key: String) -> EventLoopFuture<Void> {
         let input = DynamoDB.DeleteItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
         return db.deleteItem(input).map { _ in Void() }
