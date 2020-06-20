@@ -48,6 +48,10 @@ extension String {
 
 public class ProductService {
     
+    enum ProductError: Error {
+        case notFound
+    }
+    
     let db: DynamoDB
     let tableName: String
     
@@ -62,12 +66,9 @@ public class ProductService {
         let date = Date()
         product.createdAt = date.iso8601
         product.updatedAt = date.iso8601
-        
-        let input = DynamoDB.PutItemInput(
-            item: product.dynamoDictionary,
-            tableName: tableName
-        )
-        return db.putItem(input).flatMap { _ -> EventLoopFuture<Product> in
+        let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
+            
+        return db.putItemCodable(input).flatMap { _ -> EventLoopFuture<Product> in
             return self.readItem(key: product.sku)
         }
     }
@@ -77,8 +78,11 @@ public class ProductService {
             key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
-        return db.getItem(input).flatMapThrowing { data -> Product in
-            return try Product(dictionary: data.item ?? [:])
+        return db.getItemCodable(input, type: Product.self).flatMapThrowing { data -> Product in
+            guard let product = data.item else {
+                throw ProductError.notFound
+            }
+            return product
         }
     }
     
@@ -120,13 +124,9 @@ public class ProductService {
     }
     
     public func listItems() -> EventLoopFuture<[Product]> {
-        let input = DynamoDB.ScanInput(tableName: tableName)
-        return db.scan(input)
-            .flatMapThrowing { data -> [Product] in
-                let products: [Product]? = try data.items?.compactMap { (item) -> Product in
-                    return try Product(dictionary: item)
-                }
-                return products ?? []
+        let input = DynamoDB.QueryInput(tableName: tableName)
+        return db.queryCodable(input, type: Product.self).flatMapThrowing { data -> [Product] in
+            return data.items ?? []
         }
     }
 }
