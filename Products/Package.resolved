@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/swift-server/swift-aws-lambda-runtime.git",
         "state": {
           "branch": null,
-          "revision": "75d05ca9548bbee6dd80c6b23b68bdb60dbc84a2",
-          "version": "0.1.0"
+          "revision": "2bac89639fffd7b1197ab597473a4d10c459a230",
+          "version": "0.2.0"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "d67ac68d09a95443303e9d6e37b34e7ba101d5f1",
-          "version": "1.0.1"
+          "revision": "9b9d1868601a199334da5d14f4ab2d37d4f8d0c5",
+          "version": "1.0.2"
         }
       },
       {

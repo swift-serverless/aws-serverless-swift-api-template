@@ -22,202 +22,98 @@ import ProductService
 import Logging
 import AWSLambdaEvents
 
+import AWSLambdaEvents
+import AWSLambdaRuntime
+import Logging
+import NIO
+
 struct ProductLambdaHandler: EventLoopLambdaHandler {
     
-    typealias In = APIGateway.SimpleRequest
-    typealias Out = APIGateway.Response
+    typealias In = APIGateway.V2.Request
+    typealias Out = APIGateway.V2.Response
     
     let service: ProductService
     let operation: Operation
     
-    func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<APIGateway.Response> {
-    
-        switch operation {
+    func handle(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        
+        switch self.operation {
         case .create:
-            logger.info("create")
-            let create = CreateLambdaHandler(service: service).handle(context: context, payload: payload)
-                .flatMap { response -> EventLoopFuture<APIGateway.Response> in
-                switch response {
-                case .success(let result):
-                    let value = APIGateway.Response(with: result, statusCode: .created)
-                    return context.eventLoop.makeSucceededFuture(value)
-                case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
-                    return context.eventLoop.makeSucceededFuture(value)
-                }
-            }
-            return create
+            return createLambdaHandler(context: context, event: event)
         case .read:
-            logger.info("read")
-            let read = ReadLambdaHandler(service: service).handle(context: context, payload: payload)
-            .flatMap { response -> EventLoopFuture<APIGateway.Response> in
-                switch response {
-                case .success(let result):
-                    let value = APIGateway.Response(with: result, statusCode: .ok)
-                    return context.eventLoop.makeSucceededFuture(value)
-                case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .notFound)
-                    return context.eventLoop.makeSucceededFuture(value)
-                }
-            }
-            return read
+            return readLambdaHandler(context: context, event: event)
         case .update:
-            logger.info("update")
-            let update = UpdateLambdaHandler(service: service).handle(context: context, payload: payload)
-            .flatMap { response -> EventLoopFuture<APIGateway.Response> in
-                switch response {
-                case .success(let result):
-                    let value = APIGateway.Response(with: result, statusCode: .ok)
-                    return context.eventLoop.makeSucceededFuture(value)
-                case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .notFound)
-                    return context.eventLoop.makeSucceededFuture(value)
-                }
-            }
-            return update
+            return updateLambdaHandler(context: context, event: event)
         case .delete:
-            logger.info("delete")
-            let delete = DeleteUpdateLambdaHandler(service: service).handle(context: context, payload: payload)
-            .flatMap { response -> EventLoopFuture<APIGateway.Response> in
-                switch response {
-                case .success(let result):
-                    let value = APIGateway.Response(with: result, statusCode: .ok)
-                    return context.eventLoop.makeSucceededFuture(value)
-                case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .notFound)
-                    return context.eventLoop.makeSucceededFuture(value)
-                }
-            }
-            return delete
+            return deleteUpdateLambdaHandler(context: context, event: event)
         case .list:
-            logger.info("list")
-            let list = ListUpdateLambdaHandler(service: service).handle(context: context, payload: payload)
-            .flatMap { response -> EventLoopFuture<APIGateway.Response> in
-                switch response {
-                case .success(let result):
-                    let value = APIGateway.Response(with: result, statusCode: .ok)
-                    return context.eventLoop.makeSucceededFuture(value)
-                case .failure(let error):
-                    let value = APIGateway.Response(with: error, statusCode: .forbidden)
-                    return context.eventLoop.makeSucceededFuture(value)
-                }
-            }
-            return list
-        case .unknown:
-            logger.info("unknown")
-            let value = APIGateway.Response(with: APIError.handlerNotFound, statusCode: .forbidden)
+            return listUpdateLambdaHandler(context: context, event: event)
+        }
+    }
+    
+    func createLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        guard let product: Product = try? event.bodyObject() else {
+            let error = APIError.invalidRequest
+            return context.eventLoop.makeFailedFuture(error)
+        }
+        return service.createItem(product: product)
+            .map { result -> (APIGateway.V2.Response) in
+                return APIGateway.V2.Response(with: result, statusCode: .created)
+        }.flatMapError { (error) -> EventLoopFuture<APIGateway.V2.Response> in
+            let value = APIGateway.V2.Response(with: error, statusCode: .forbidden)
             return context.eventLoop.makeSucceededFuture(value)
         }
     }
     
-    struct CreateLambdaHandler {
-        
-        let service: ProductService
-        
-        init(service: ProductService) {
-            self.service = service
+    func readLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        guard let sku = event.pathParameters?["sku"] else {
+            let error = APIError.invalidRequest
+            return context.eventLoop.makeFailedFuture(error)
         }
-
-        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
-                    
-            guard let product: Product = try? payload.object() else {
-                let error = APIError.invalidRequest
-                return context.eventLoop.makeFailedFuture(error)
-            }
-            let future = service.createItem(product: product)
-                .flatMapThrowing { item -> Result<Product,Error> in
-                    return Result.success(product)
-            }
-            return future
+        return service.readItem(key: sku)
+            .flatMapThrowing { result -> APIGateway.V2.Response in
+                return APIGateway.V2.Response(with: result, statusCode: .ok)
+        }.flatMapError { (error) -> EventLoopFuture<APIGateway.V2.Response> in
+            let value = APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return context.eventLoop.makeSucceededFuture(value)
         }
     }
     
-    struct ReadLambdaHandler {
-    
-        let service: ProductService
-        
-        init(service: ProductService) {
-            self.service = service
+    func updateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        guard let product: Product = try? event.bodyObject() else {
+            let error = APIError.invalidRequest
+            return context.eventLoop.makeFailedFuture(error)
         }
-
-        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
-            
-            guard let sku = payload.pathParameters?["sku"] else {
-                 let error = APIError.invalidRequest
-                return context.eventLoop.makeFailedFuture(error)
-            }
-            let future = service.readItem(key: sku)
-                .flatMapThrowing { data -> Result<Product,Error> in
-                    let product = try Product(dictionary: data.item ?? [:])
-                    return Result.success(product)
-            }
-            return future
+        return service.updateItem(product: product)
+            .map { result -> (APIGateway.V2.Response) in
+                return APIGateway.V2.Response(with: result, statusCode: .ok)
+        }.flatMapError { (error) -> EventLoopFuture<APIGateway.V2.Response> in
+            let value = APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return context.eventLoop.makeSucceededFuture(value)
         }
     }
     
-    struct UpdateLambdaHandler {
-        
-        let service: ProductService
-        
-        init(service: ProductService) {
-            self.service = service
+    func deleteUpdateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        guard let sku = event.pathParameters?["sku"] else {
+            let error = APIError.invalidRequest
+            return context.eventLoop.makeFailedFuture(error)
         }
-
-        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<Product,Error>> {
-            
-            guard let product: Product = try? payload.object() else {
-                let error = APIError.invalidRequest
-                return context.eventLoop.makeFailedFuture(error)
-            }
-            let future = service.updateItem(product: product)
-                .flatMapThrowing { (data) -> Result<Product,Error> in
-                    return Result.success(product)
-            }
-            return future
+        return service.deleteItem(key: sku)
+            .map { _ -> (APIGateway.V2.Response) in
+                return APIGateway.V2.Response(with: EmptyResponse(), statusCode: .ok)
+        }.flatMapError { (error) -> EventLoopFuture<APIGateway.V2.Response> in
+            let value = APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return context.eventLoop.makeSucceededFuture(value)
         }
     }
     
-    struct DeleteUpdateLambdaHandler {
-        
-        let service: ProductService
-        
-        init(service: ProductService) {
-            self.service = service
-        }
-
-        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<EmptyResponse,Error>> {
-            
-            guard let sku = payload.pathParameters?["sku"] else {
-                 let error = APIError.invalidRequest
-                               return context.eventLoop.makeFailedFuture(error)
-            }
-            let future = service.deleteItem(key: sku)
-                .flatMapThrowing { (data) -> Result<EmptyResponse,Error> in
-                    return Result.success(EmptyResponse())
-            }
-            return future
-        }
-    }
-    
-    struct ListUpdateLambdaHandler {
-        
-        let service: ProductService
-        
-        init(service: ProductService) {
-            self.service = service
-        }
-
-        func handle(context: Lambda.Context, payload: APIGateway.SimpleRequest) -> EventLoopFuture<Result<[Product],Error>> {
-            
-            let future = service.listItems()
-                .flatMapThrowing { data -> Result<[Product],Error> in
-                    let products: [Product]? = try data.items?.compactMap { (item) -> Product in
-                        return try Product(dictionary: item)
-                    }
-                    let object = products ?? []
-                    return Result.success(object)
-            }
-            return future
+    func listUpdateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) -> EventLoopFuture<APIGateway.V2.Response> {
+        return service.listItems()
+            .flatMapThrowing { result -> APIGateway.V2.Response in
+                return APIGateway.V2.Response(with: result, statusCode: .ok)
+        }.flatMapError { (error) -> EventLoopFuture<APIGateway.V2.Response> in
+            let value = APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return context.eventLoop.makeSucceededFuture(value)
         }
     }
 }

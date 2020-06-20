@@ -15,39 +15,51 @@
 import Foundation
 import AWSDynamoDB
 
-public struct ProductField {
-    static let sku = "sku"
-    static let name = "name"
-    static let description = "description"
-    static let createdAt = "createdAt"
-    static let updatedAt = "updatedAt"
+import AWSDynamoDB
+import Foundation
+
+public enum ProductError: Error {
+    case invalidItem
 }
 
-public extension Product {
-    var dynamoDictionary: [String : DynamoDB.AttributeValue] {
-        var dictionary = [ProductField.sku: DynamoDB.AttributeValue(s:sku),
-                          ProductField.name: DynamoDB.AttributeValue(s:name),
-                          ProductField.description: DynamoDB.AttributeValue(s:description)]
-        if let createdAt = createdAt {
-            dictionary[ProductField.createdAt] = DynamoDB.AttributeValue(s:createdAt)
+extension Product {
+    
+    public var dynamoDictionary: [String: DynamoDB.AttributeValue] {
+        var dictionary = [
+            Field.sku: DynamoDB.AttributeValue(s: sku),
+            Field.name: DynamoDB.AttributeValue(s: name),
+            Field.description: DynamoDB.AttributeValue(s: description),
+        ]
+        if let createdAt = createdAt?.timeIntervalSince1970String {
+            dictionary[Field.createdAt] = DynamoDB.AttributeValue(n: createdAt)
         }
         
-        if let updatedAt = updatedAt {
-            dictionary[ProductField.updatedAt] = DynamoDB.AttributeValue(s:updatedAt)
+        if let updatedAt = updatedAt?.timeIntervalSince1970String {
+            dictionary[Field.updatedAt] = DynamoDB.AttributeValue(n: updatedAt)
         }
         return dictionary
     }
     
-    init(dictionary: [String: DynamoDB.AttributeValue]) throws {
-        guard let name = dictionary[ProductField.name]?.s,
-            let sku = dictionary[ProductField.sku]?.s,
-            let description = dictionary[ProductField.description]?.s else {
-                throw APIError.invalidItem
+    public init(dictionary: [String: DynamoDB.AttributeValue]) throws {
+        guard let name = dictionary[Field.name]?.s,
+            let sku = dictionary[Field.sku]?.s,
+            let description = dictionary[Field.description]?.s
+            else {
+                throw ProductError.invalidItem
         }
         self.name = name
         self.sku = sku
         self.description = description
-        self.createdAt = dictionary[ProductField.createdAt]?.s
-        self.updatedAt = dictionary[ProductField.updatedAt]?.s
+        if let value = dictionary[Field.createdAt]?.n,
+            let timeInterval = TimeInterval(value) {
+            let date = Date(timeIntervalSince1970: timeInterval)
+            self.createdAt = date.iso8601
+        }
+        if let value = dictionary[Field.updatedAt]?.n,
+            let timeInterval = TimeInterval(value) {
+            let date = Date(timeIntervalSince1970: timeInterval)
+            self.updatedAt = date.iso8601
+        }
     }
 }
+

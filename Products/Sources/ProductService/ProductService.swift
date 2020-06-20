@@ -12,23 +12,37 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import Foundation
 import AWSDynamoDB
+import Foundation
 import NIO
 
-public enum APIError: Error {
-    case invalidItem
-    case tableNameNotFound
-    case invalidRequest
-    case handlerNotFound
+extension DateFormatter {
+    static var iso8061: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter
+    }
 }
 
 extension Date {
     var iso8601: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        let formatter = DateFormatter.iso8061
         return formatter.string(from: self)
+    }
+}
+
+extension String {
+    var iso8601: Date? {
+        let formatter = DateFormatter.iso8061
+        return formatter.date(from: self)
+    }
+    
+    var timeIntervalSince1970String: String? {
+        guard let timeInterval = self.iso8601?.timeIntervalSince1970 else {
+            return nil
+        }
+        return "\(timeInterval)"
     }
 }
 
@@ -42,63 +56,77 @@ public class ProductService {
         self.tableName = tableName
     }
     
-    public func createItem(product: Product) -> EventLoopFuture<DynamoDB.PutItemOutput> {
+    public func createItem(product: Product) -> EventLoopFuture<Product> {
         
         var product = product
-        let date = Date().iso8601
-        product.createdAt = date
-        product.updatedAt = date
+        let date = Date()
+        product.createdAt = date.iso8601
+        product.updatedAt = date.iso8601
         
         let input = DynamoDB.PutItemInput(
             item: product.dynamoDictionary,
             tableName: tableName
         )
-        return db.putItem(input)
+        return db.putItem(input).flatMap { _ -> EventLoopFuture<Product> in
+            return self.readItem(key: product.sku)
+        }
     }
     
-    public func readItem(key: String) -> EventLoopFuture<DynamoDB.GetItemOutput> {
+    public func readItem(key: String) -> EventLoopFuture<Product> {
         let input = DynamoDB.GetItemInput(
-            key: [ProductField.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
             tableName: tableName
         )
-        return db.getItem(input)
+        return db.getItem(input).flatMapThrowing { data -> Product in
+            return try Product(dictionary: data.item ?? [:])
+        }
     }
     
-    public func updateItem(product: Product) -> EventLoopFuture<DynamoDB.UpdateItemOutput> {
-        
+    public func updateItem(product: Product) -> EventLoopFuture<Product> {
         var product = product
-        let date = Date().iso8601
-        product.updatedAt = date
+        let date = Date()
+        let updatedAt = "\(date.timeIntervalSince1970)"
+        product.updatedAt = date.iso8601
         
         let input = DynamoDB.UpdateItemInput(
+            conditionExpression: "attribute_exists(#createdAt)",
             expressionAttributeNames: [
-                "#name": ProductField.name,
-                "#description": ProductField.description,
-                "#updatedAt": ProductField.updatedAt
+                "#name": Product.Field.name,
+                "#description": Product.Field.description,
+                "#updatedAt": Product.Field.updatedAt,
+                "#createdAt": Product.Field.createdAt
             ],
             expressionAttributeValues: [
-                ":name": DynamoDB.AttributeValue(s:product.name),
-                ":description": DynamoDB.AttributeValue(s:product.description),
-                ":updatedAt": DynamoDB.AttributeValue(s:product.updatedAt)
+                ":name": DynamoDB.AttributeValue(s: product.name),
+                ":description": DynamoDB.AttributeValue(s: product.description),
+                ":updatedAt": DynamoDB.AttributeValue(n: updatedAt)
             ],
-            key: [ProductField.sku: DynamoDB.AttributeValue(s: product.sku)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue(s: product.sku)],
             returnValues: DynamoDB.ReturnValue.allNew,
             tableName: tableName,
             updateExpression: "SET #name = :name, #description = :description, #updatedAt = :updatedAt"
         )
-        return db.updateItem(input)
+        return db.updateItem(input).flatMap { _ -> EventLoopFuture<Product> in
+            return self.readItem(key: product.sku)
+        }
     }
     
-    public func deleteItem(key: String) -> EventLoopFuture<DynamoDB.DeleteItemOutput> {
+    public func deleteItem(key: String) -> EventLoopFuture<Void> {
         let input = DynamoDB.DeleteItemInput(
-            key: [ProductField.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
             tableName: tableName
         )
-        return db.deleteItem(input)
+        return db.deleteItem(input).map { _ in Void() }
     }
     
-    public func listItems() -> EventLoopFuture<DynamoDB.ScanOutput> {
+    public func listItems() -> EventLoopFuture<[Product]> {
         let input = DynamoDB.ScanInput(tableName: tableName)
         return db.scan(input)
+            .flatMapThrowing { data -> [Product] in
+                let products: [Product]? = try data.items?.compactMap { (item) -> Product in
+                    return try Product(dictionary: item)
+                }
+                return products ?? []
+        }
     }
 }

@@ -12,68 +12,64 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import Foundation
 import AWSLambdaEvents
-import ProductService
+import class Foundation.JSONEncoder
+import class Foundation.JSONDecoder
 
-public extension APIGateway {
-    struct SimpleRequest: Codable {
-        public let body: String?
-        public let pathParameters: [String: String]?
-        
-        public func object<T: Codable>() throws -> T {
-            let decoder = JSONDecoder()
-            guard let body = self.body,
-                let dataBody = body.data(using: .utf8) else {
-                    throw APIError.invalidRequest
-            }
-            return try decoder.decode(T.self, from: dataBody)
+public enum APIError: Error {
+    case invalidItem
+    case tableNameNotFound
+    case invalidRequest
+    case invalidHandler
+}
+
+extension APIGateway.V2.Request {
+    
+    static private let decoder = JSONDecoder()
+    
+    public func bodyObject<T: Codable>() throws -> T {
+        guard let body = self.body,
+            let dataBody = body.data(using: .utf8)
+            else {
+                throw APIError.invalidRequest
         }
+        return try Self.decoder.decode(T.self, from: dataBody)
     }
 }
 
-let defaultHeaders = ["Content-Type": "application/json",
-               "Access-Control-Allow-Origin": "*",
-               "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
-               "Access-Control-Allow-Credentials": "true"]
-
-extension APIGateway.Response {
-
-    init(with error: Error, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
+extension APIGateway.V2.Response {
     
+    private static let encoder = JSONEncoder()
+    
+    public static let defaultHeaders = [
+        "Content-Type": "application/json",
+        //Security warning: XSS are enabled
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
+        "Access-Control-Allow-Credentials": "true",
+    ]
+    
+    public init(with error: Error, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         self.init(
             statusCode: statusCode,
-            headers: defaultHeaders,
+            headers: APIGateway.V2.Response.defaultHeaders,
             multiValueHeaders: nil,
-            body: "{\"message\":\"\(error.localizedDescription)\"}",
+            body: "{\"message\":\"\(String(describing: error))\"}",
             isBase64Encoded: false
         )
     }
     
-    init<Out: Encodable>(with object: Out, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
-        let encoder = JSONEncoder()
-        
+    public init<Out: Encodable>(with object: Out, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         var body: String = "{}"
-        if let data = try? encoder.encode(object) {
+        if let data = try? Self.encoder.encode(object) {
             body = String(data: data, encoding: .utf8) ?? body
         }
         self.init(
             statusCode: statusCode,
-            headers: defaultHeaders,
+            headers: APIGateway.V2.Response.defaultHeaders,
             multiValueHeaders: nil,
             body: body,
             isBase64Encoded: false
         )
-        
-    }
-    
-    init<Out: Encodable>(with result: Result<Out, Error>, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
-        
-        switch result {
-        case .success(let value):
-            self.init(with: value, statusCode: statusCode)
-        case .failure(let error):
-            self.init(with: error, statusCode: statusCode)
-        }
     }
 }

@@ -1,13 +1,13 @@
-service: swift-sprinter-rest-api-swift
+service: swift-sprinter-rest-api
 
 package:
     individually: true
 
 provider:
     name: aws
+    httpApi:
+        payload: '2.0'
     runtime: provided
-    # stage: ${opt:stage, 'dev'}
-    # region: ${opt:region, 'us-east-1'}
     environment:
         PRODUCTS_TABLE_NAME: "${self:custom.productsTableName}"
     iamRoleStatements:
@@ -27,16 +27,16 @@ provider:
               - dynamodb:Scan
               - dynamodb:DescribeTable
           Resource:
-              - { Fn::GetAtt: [ProductsTable, Arn] }
+              - { Fn::GetAtt: [ProductsTable, Arn] }            
+
+custom:
+    productsTableName: products-table-${self:provider.stage}
 
 layers:
     swift-lambda-runtime:
         path: ./build/swift-lambda-runtime
         name: aws-swift-sprinter-lambda-runtime
-        description: AWS Lambda Custom Runtime for Swift-Sprinter             
-
-custom:
-    productsTableName: swift-sprinter-products-table-${self:provider.stage}
+        description: AWS Lambda Custom Runtime for Swift-Sprinter   
 
 functions:
     createProduct:
@@ -52,10 +52,10 @@ functions:
            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${self:provider.stage}] Create Product"
         events:
-            - http:
-                  path: products
-                  method: post
-                  cors: true
+            - httpApi:
+                path: /products
+                method: post
+                cors: true
     readProduct:
         handler: build/Products.read
         package:
@@ -69,10 +69,10 @@ functions:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${self:provider.stage}] Get Product"
         events:
-            - http:
-                    path: products/{sku}
-                    method: get
-                    cors: true
+            - httpApi:
+                path: /products/{sku}
+                method: get
+                cors: true
     updateProduct:
         handler: build/Products.update
         package:
@@ -86,10 +86,10 @@ functions:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${self:provider.stage}] Update Product"
         events:
-            - http:
-                  path: products
-                  method: put
-                  cors: true
+            - httpApi:
+                path: /products
+                method: put
+                cors: true
     deleteProduct:
         handler: build/Products.delete
         package:
@@ -103,10 +103,10 @@ functions:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${self:provider.stage}] Delete Product"
         events:
-            - http:
-                  path: products/{sku}
-                  method: delete
-                  cors: true
+            - httpApi:
+                path: /products/{sku}
+                method: delete
+                cors: true
     listProducts:
         handler: build/Products.list
         package:
@@ -120,10 +120,10 @@ functions:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${self:provider.stage}] List Products"
         events:
-            - http:
-                  path: products
-                  method: get
-                  cors: true
+            - httpApi:
+                path: /products
+                method: get
+                cors: true
 
 resources:
     Resources:

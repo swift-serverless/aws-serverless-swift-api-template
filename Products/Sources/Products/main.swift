@@ -13,8 +13,5 @@
 //    limitations under the License.
 
 import AWSLambdaRuntime
-import Logging
-
-let logger = Logger(label: "AWS.Lambda.ProductService")
 
 Lambda.run(ProductLambda.init)
