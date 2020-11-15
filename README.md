@@ -1,6 +1,6 @@
 # AWS Serverless Swift API Template
 
-[![Swift 5.2.3](https://img.shields.io/badge/Swift-5.2.3-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
+[![Swift 5.3](https://img.shields.io/badge/Swift-5.3-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
 
 This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as development language.
 

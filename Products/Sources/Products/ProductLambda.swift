@@ -12,7 +12,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import AWSDynamoDB
+import SotoDynamoDB
 import AWSLambdaEvents
 import AWSLambdaRuntime
 import AsyncHTTPClient
@@ -37,7 +37,7 @@ struct ProductLambda: LambdaHandler {
     
     let dbTimeout: Int64 = 30
     let region: Region
-    let db: AWSDynamoDB.DynamoDB
+    let db: SotoDynamoDB.DynamoDB
     let service: ProductService
     let tableName: String
     let operation: Operation
@@ -80,7 +80,8 @@ struct ProductLambda: LambdaHandler {
             configuration: configuration
         )
         
-        self.db = AWSDynamoDB.DynamoDB(region: region, httpClientProvider: .shared(self.httpClient))
+        let awsClient = AWSClient(httpClientProvider: .shared(self.httpClient))
+        self.db = SotoDynamoDB.DynamoDB(client: awsClient, region: region)
         self.tableName = try Self.tableName()
 
         self.service = ProductService(

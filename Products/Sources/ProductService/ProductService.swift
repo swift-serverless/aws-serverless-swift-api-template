@@ -12,7 +12,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import AWSDynamoDB
+import SotoDynamoDB
 import Foundation
 import NIO
 
@@ -68,7 +68,7 @@ public class ProductService {
         product.updatedAt = date.iso8601
         let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
             
-        return db.putItemCodable(input).flatMap { _ -> EventLoopFuture<Product> in
+        return db.putItem(input).flatMap { _ -> EventLoopFuture<Product> in
             return self.readItem(key: product.sku)
         }
     }
@@ -78,7 +78,7 @@ public class ProductService {
             key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
-        return db.getItemCodable(input, type: Product.self).flatMapThrowing { data -> Product in
+        return db.getItem(input, type: Product.self).flatMapThrowing { data -> Product in
             guard let product = data.item else {
                 throw ProductError.notFound
             }
@@ -89,7 +89,7 @@ public class ProductService {
     public func updateItem(product: Product) -> EventLoopFuture<Product> {
         var product = product
         let date = Date()
-        let updatedAt = "\(date.timeIntervalSince1970)"
+        let updatedAt = date.iso8601
         product.updatedAt = date.iso8601
         
         let input = DynamoDB.UpdateItemInput(
@@ -103,7 +103,7 @@ public class ProductService {
             expressionAttributeValues: [
                 ":name": DynamoDB.AttributeValue.s(product.name),
                 ":description": DynamoDB.AttributeValue.s(product.description),
-                ":updatedAt": DynamoDB.AttributeValue.n(updatedAt)
+                ":updatedAt": DynamoDB.AttributeValue.s(updatedAt)
             ],
             key: [Product.Field.sku: DynamoDB.AttributeValue.s(product.sku)],
             returnValues: DynamoDB.ReturnValue.allNew,
@@ -124,8 +124,8 @@ public class ProductService {
     }
     
     public func listItems() -> EventLoopFuture<[Product]> {
-        let input = DynamoDB.QueryInput(tableName: tableName)
-        return db.queryCodable(input, type: Product.self).flatMapThrowing { data -> [Product] in
+        let input = DynamoDB.ScanInput(tableName: tableName)
+        return db.scan(input, type: Product.self).flatMapThrowing { data -> [Product] in
             return data.items ?? []
         }
     }
