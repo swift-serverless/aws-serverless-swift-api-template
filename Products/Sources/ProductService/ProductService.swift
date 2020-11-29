@@ -12,7 +12,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import AWSDynamoDB
+import SotoDynamoDB
 import Foundation
 import NIO
 
@@ -48,6 +48,10 @@ extension String {
 
 public class ProductService {
     
+    enum ProductError: Error {
+        case notFound
+    }
+    
     let db: DynamoDB
     let tableName: String
     
@@ -62,11 +66,8 @@ public class ProductService {
         let date = Date()
         product.createdAt = date.iso8601
         product.updatedAt = date.iso8601
-        
-        let input = DynamoDB.PutItemInput(
-            item: product.dynamoDictionary,
-            tableName: tableName
-        )
+        let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
+            
         return db.putItem(input).flatMap { _ -> EventLoopFuture<Product> in
             return self.readItem(key: product.sku)
         }
@@ -74,18 +75,21 @@ public class ProductService {
     
     public func readItem(key: String) -> EventLoopFuture<Product> {
         let input = DynamoDB.GetItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
-        return db.getItem(input).flatMapThrowing { data -> Product in
-            return try Product(dictionary: data.item ?? [:])
+        return db.getItem(input, type: Product.self).flatMapThrowing { data -> Product in
+            guard let product = data.item else {
+                throw ProductError.notFound
+            }
+            return product
         }
     }
     
     public func updateItem(product: Product) -> EventLoopFuture<Product> {
         var product = product
         let date = Date()
-        let updatedAt = "\(date.timeIntervalSince1970)"
+        let updatedAt = date.iso8601
         product.updatedAt = date.iso8601
         
         let input = DynamoDB.UpdateItemInput(
@@ -97,11 +101,11 @@ public class ProductService {
                 "#createdAt": Product.Field.createdAt
             ],
             expressionAttributeValues: [
-                ":name": DynamoDB.AttributeValue(s: product.name),
-                ":description": DynamoDB.AttributeValue(s: product.description),
-                ":updatedAt": DynamoDB.AttributeValue(n: updatedAt)
+                ":name": DynamoDB.AttributeValue.s(product.name),
+                ":description": DynamoDB.AttributeValue.s(product.description),
+                ":updatedAt": DynamoDB.AttributeValue.s(updatedAt)
             ],
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: product.sku)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(product.sku)],
             returnValues: DynamoDB.ReturnValue.allNew,
             tableName: tableName,
             updateExpression: "SET #name = :name, #description = :description, #updatedAt = :updatedAt"
@@ -113,7 +117,7 @@ public class ProductService {
     
     public func deleteItem(key: String) -> EventLoopFuture<Void> {
         let input = DynamoDB.DeleteItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue(s: key)],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
         return db.deleteItem(input).map { _ in Void() }
@@ -121,12 +125,8 @@ public class ProductService {
     
     public func listItems() -> EventLoopFuture<[Product]> {
         let input = DynamoDB.ScanInput(tableName: tableName)
-        return db.scan(input)
-            .flatMapThrowing { data -> [Product] in
-                let products: [Product]? = try data.items?.compactMap { (item) -> Product in
-                    return try Product(dictionary: item)
-                }
-                return products ?? []
+        return db.scan(input, type: Product.self).flatMapThrowing { data -> [Product] in
+            return data.items ?? []
         }
     }
 }
