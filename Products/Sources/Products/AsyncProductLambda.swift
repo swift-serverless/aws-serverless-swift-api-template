@@ -1,4 +1,4 @@
-//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2022 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -20,9 +20,19 @@ import Logging
 import NIO
 import ProductService
 
-#if !(compiler(>=5.5) && canImport(_Concurrency))
- 
-struct ProductLambda: LambdaHandler {
+enum Operation: String {
+    case create = "build/Products.create"
+    case read = "build/Products.read"
+    case update = "build/Products.update"
+    case delete = "build/Products.delete"
+    case list = "build/Products.list"
+}
+
+struct EmptyResponse: Codable {}
+
+#if compiler(>=5.5) && canImport(_Concurrency)
+
+struct AsyncProductLambda: AsyncLambdaHandler {
     
     typealias In = APIGateway.V2.Request
     typealias Out = APIGateway.V2.Response
@@ -82,15 +92,8 @@ struct ProductLambda: LambdaHandler {
         )
     }
     
-    func handle(
-        context: Lambda.Context, event: APIGateway.V2.Request,
-        callback: @escaping (Result<APIGateway.V2.Response, Error>) -> Void
-    ) {
-        let _ = ProductLambdaHandler(service: service, operation: operation)
-            .handle(context: context, event: event)
-            .always { (result) in
-                callback(result)
-        }
+    func handle(event: AWSLambdaEvents.APIGateway.V2.Request, context: AWSLambdaRuntimeCore.Lambda.Context) async throws -> AWSLambdaEvents.APIGateway.V2.Response {
+        return await AsyncProductLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
     }
 }
 

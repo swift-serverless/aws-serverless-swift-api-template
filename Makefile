@@ -14,8 +14,8 @@
 
 # Use this tag to build a customized local image
 
-SWIFT_VERSION?=5.5-amazonlinux2
-LAYER_VERSION?=5.5-amazonlinux2
+SWIFT_VERSION?=5.7-amazonlinux2
+LAYER_VERSION?=5.7-amazonlinux2
 DOCKER_OS?=amazonlinux2
 
 # SWIFT_VERSION?=nightly-master-amazonlinux2
