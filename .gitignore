@@ -2,3 +2,4 @@ build
 swift-shared-libs
 .serverless
 .build
+.vscode
