@@ -53,7 +53,6 @@ extension APIGateway.V2.Response {
         self.init(
             statusCode: statusCode,
             headers: APIGateway.V2.Response.defaultHeaders,
-            multiValueHeaders: nil,
             body: "{\"message\":\"\(String(describing: error))\"}",
             isBase64Encoded: false
         )
@@ -67,7 +66,6 @@ extension APIGateway.V2.Response {
         self.init(
             statusCode: statusCode,
             headers: APIGateway.V2.Response.defaultHeaders,
-            multiValueHeaders: nil,
             body: body,
             isBase64Encoded: false
         )
