@@ -59,21 +59,97 @@ public class ProductService {
         self.db = db
         self.tableName = tableName
     }
+}
+
+#if compiler(>=5.5) && canImport(_Concurrency)
+
+public extension ProductService {
     
-    public func createItem(product: Product) -> EventLoopFuture<Product> {
+    func createItem(product: Product) async throws -> Product {
+        var product = product
+        let date = Date()
+        product.createdAt = date.iso8601
+        product.updatedAt = date.iso8601
+        let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
+        
+        let _ = try await db.putItem(input)
+        return try await readItem(key: product.sku)
+    }
+    
+    func readItem(key: String) async throws -> Product {
+        let input = DynamoDB.GetItemInput(
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
+            tableName: tableName
+        )
+        let data = try await db.getItem(input, type: Product.self)
+        guard let product = data.item else {
+            throw ProductError.notFound
+        }
+        return product
+    }
+    
+    func updateItem(product: Product) async throws -> Product {
+        var product = product
+        let date = Date()
+        let updatedAt = date.iso8601
+        product.updatedAt = date.iso8601
+        
+        let input = DynamoDB.UpdateItemInput(
+            conditionExpression: "attribute_exists(#createdAt)",
+            expressionAttributeNames: [
+                "#name": Product.Field.name,
+                "#description": Product.Field.description,
+                "#updatedAt": Product.Field.updatedAt,
+                "#createdAt": Product.Field.createdAt
+            ],
+            expressionAttributeValues: [
+                ":name": DynamoDB.AttributeValue.s(product.name),
+                ":description": DynamoDB.AttributeValue.s(product.description),
+                ":updatedAt": DynamoDB.AttributeValue.s(updatedAt)
+            ],
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(product.sku)],
+            returnValues: DynamoDB.ReturnValue.allNew,
+            tableName: tableName,
+            updateExpression: "SET #name = :name, #description = :description, #updatedAt = :updatedAt"
+        )
+        let _ = try await db.updateItem(input)
+        return try await readItem(key: product.sku)
+    }
+    
+    func deleteItem(key: String) async throws {
+        let input = DynamoDB.DeleteItemInput(
+            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
+            tableName: tableName
+        )
+        let _ = try await db.deleteItem(input)
+        return
+    }
+    
+    func listItems() async throws -> [Product] {
+        let input = DynamoDB.ScanInput(tableName: tableName)
+        let data = try await db.scan(input, type: Product.self)
+        return data.items ?? []
+    }
+}
+
+#else
+
+public extension ProductService {
+    
+    func createItem(product: Product) -> EventLoopFuture<Product> {
         
         var product = product
         let date = Date()
         product.createdAt = date.iso8601
         product.updatedAt = date.iso8601
         let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
-            
+        
         return db.putItem(input).flatMap { _ -> EventLoopFuture<Product> in
             return self.readItem(key: product.sku)
         }
     }
     
-    public func readItem(key: String) -> EventLoopFuture<Product> {
+    func readItem(key: String) -> EventLoopFuture<Product> {
         let input = DynamoDB.GetItemInput(
             key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
@@ -86,7 +162,7 @@ public class ProductService {
         }
     }
     
-    public func updateItem(product: Product) -> EventLoopFuture<Product> {
+    func updateItem(product: Product) -> EventLoopFuture<Product> {
         var product = product
         let date = Date()
         let updatedAt = date.iso8601
@@ -115,7 +191,7 @@ public class ProductService {
         }
     }
     
-    public func deleteItem(key: String) -> EventLoopFuture<Void> {
+    func deleteItem(key: String) -> EventLoopFuture<Void> {
         let input = DynamoDB.DeleteItemInput(
             key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
@@ -123,10 +199,12 @@ public class ProductService {
         return db.deleteItem(input).map { _ in Void() }
     }
     
-    public func listItems() -> EventLoopFuture<[Product]> {
+    func listItems() -> EventLoopFuture<[Product]> {
         let input = DynamoDB.ScanInput(tableName: tableName)
         return db.scan(input, type: Product.self).flatMapThrowing { data -> [Product] in
             return data.items ?? []
         }
     }
 }
+
+#endif

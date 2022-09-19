@@ -14,4 +14,8 @@
 
 import AWSLambdaRuntime
 
-Lambda.run(ProductLambda.init)
+#if compiler(>=5.5) && canImport(_Concurrency)
+    Lambda.run(AsyncProductLambda.init)
+#else
+    Lambda.run(ProductLambda.init)
+#endif
