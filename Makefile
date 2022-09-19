@@ -14,8 +14,8 @@
 
 # Use this tag to build a customized local image
 
-SWIFT_VERSION?=5.3-amazonlinux2
-LAYER_VERSION?=5.3-amazonlinux2
+SWIFT_VERSION?=5.5-amazonlinux2
+LAYER_VERSION?=5.5-amazonlinux2
 DOCKER_OS?=amazonlinux2
 
 # SWIFT_VERSION?=nightly-master-amazonlinux2
@@ -97,6 +97,15 @@ create_build_directory:
 	if [ ! -d "$(LAYER_BUILD_PATH)" ]; then mkdir -p $(LAYER_BUILD_PATH); fi
 	if [ ! -d "$(SERVERLESS_BUILD)" ]; then mkdir -p $(SERVERLESS_BUILD); fi
 
+extract_libraries:
+	docker run \
+			-it \
+			--rm \
+			--volume "$(MOUNT_ROOT)/:/src" \
+			--workdir "/src" \
+			$(SWIFT_DOCKER_IMAGE) \
+			/bin/bash -c "ldd $(SWIFT_PROJECT_PATH)/.build/$(SWIFT_CONFIGURATION)/$(SWIFT_EXECUTABLE) | grep swift | ./extract.sh > docker/$(SWIFT_VERSION)/swift-shared-libraries.txt"
+
 package_lambda: create_build_directory build_lambda
 	zip -r -j $(LAMBDA_BUILD_PATH)/$(LAMBDA_ZIP) $(SWIFT_PROJECT_PATH)/$(BUILD_PATH)/$(SWIFT_CONFIGURATION)/$(SWIFT_EXECUTABLE)
 
@@ -123,3 +132,13 @@ endif
 cp_layer_to_sls_build_local: create_build_directory
 	if [ ! -d "./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)" ]; then mkdir -p ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER); fi
 	cp -R ./$(SHARED_LIBS_FOLDER)/. ./$(SERVERLESS_BUILD)/$(SERVERLESS_LAYER)
+
+# test_api:
+# 	curl -X POST https://$(API_ID).execute-api.us-east-1.amazonaws.com/products -H 'Content-Type: application/json' -d '{"updatedAt":"2022-06-27T20:27:03.030Z","name":"Hello","description":"Hello","sku":"4","createdAt":"2022-06-27T20:27:03.030Z"}'
+# 	curl -X POST https://$(API_ID).execute-api.us-east-1.amazonaws.com/products -H 'Content-Type: application/json' -d '{"updatedAt":"2022-06-27T20:27:03.030Z","name":"Hello","description":"Hello","sku":"5","createdAt":"2022-06-27T20:27:03.030Z"}'
+# 	curl https://$(API_ID).execute-api.us-east-1.amazonaws.com/products/4
+# 	curl https://$(API_ID).execute-api.us-east-1.amazonaws.com/products
+# 	curl -X DEL https://$(API_ID).execute-api.us-east-1.amazonaws.com/products/4
+# 	curl -PUT https://$(API_ID).execute-api.us-east-1.amazonaws.com/products -H 'Content-Type: application/json' -d '{"createdAt":"2022-06-27T20:27:03.030Z","description":"Hello 3","updatedAt":"2022-06-27T20:27:03.030Z","name":"Hello","sku":"3"}'
+# 	curl -X DEL https://$(API_ID).execute-api.us-east-1.amazonaws.com/products/5
+# 	curl https://$(API_ID).execute-api.us-east-1.amazonaws.com/products
