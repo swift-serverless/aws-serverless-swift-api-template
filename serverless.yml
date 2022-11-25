@@ -1,36 +1,42 @@
 service: swift-sprinter-rest-api
+variablesResolutionMode: 20210326
+configValidationMode: warn
 
 package:
     individually: true
+
+custom:
+    tableName: 'products-table-${sls:stage}'
 
 provider:
     name: aws
     httpApi:
         payload: '2.0'
+        cors: true
     runtime: provided
+    lambdaHashingVersion: "20201221"
     environment:
-        PRODUCTS_TABLE_NAME: "${self:custom.productsTableName}"
-    iamRoleStatements:
-        - Effect: Allow
-          Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-          Resource: "*"
-        - Effect: Allow
-          Action:
-              - dynamodb:UpdateItem
-              - dynamodb:PutItem
-              - dynamodb:GetItem
-              - dynamodb:DeleteItem
-              - dynamodb:Query
-              - dynamodb:Scan
-              - dynamodb:DescribeTable
-          Resource:
-              - { Fn::GetAtt: [ProductsTable, Arn] }            
-
-custom:
-    productsTableName: products-table-${self:provider.stage}
+        PRODUCTS_TABLE_NAME: '${self:custom.tableName}'
+    iam:
+        role:
+            statements:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:DescribeTable
+                  Resource:
+                    - { Fn::GetAtt: [ProductsTable, Arn] }
 
 layers:
     swift-lambda-runtime:
@@ -43,94 +49,84 @@ functions:
         handler: build/Products.create
         package:
             individually: true
-            exclude:
-                - "**/*"
-            include:
-                - build/Products
+            patterns:
+                - "!**/*"
+                - "build/Products"
         memorySize: 256
         layers:
-           - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${self:provider.stage}] Create Product"
+           - { Ref: "SwiftDashlambdaDashruntimeLambdaLayer" }
+        description: "[${sls:stage}] Create Product"
         events:
             - httpApi:
                 path: /products
                 method: post
-                cors: true
     readProduct:
         handler: build/Products.read
         package:
             individually: true
-            exclude:
-                - "**/*"
-            include:
-                - build/Products
+            patterns:
+                - "!**/*"
+                - "build/Products"
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${self:provider.stage}] Get Product"
+        description: "[${sls:stage}] Get Product"
         events:
             - httpApi:
                 path: /products/{sku}
                 method: get
-                cors: true
     updateProduct:
         handler: build/Products.update
         package:
             individually: true
-            exclude:
-                - "**/*"
-            include:
-                - build/Products
+            patterns:
+                - "!**/*"
+                - "build/Products"
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${self:provider.stage}] Update Product"
+        description: "[${sls:stage}] Update Product"
         events:
             - httpApi:
                 path: /products
                 method: put
-                cors: true
     deleteProduct:
         handler: build/Products.delete
         package:
             individually: true
-            exclude:
-                - "**/*"
-            include:
+            patterns:
+                - "!**/*"
                 - build/Products
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${self:provider.stage}] Delete Product"
+        description: "[${sls:stage}] Delete Product"
         events:
             - httpApi:
                 path: /products/{sku}
                 method: delete
-                cors: true
     listProducts:
         handler: build/Products.list
         package:
             individually: true
-            exclude:
-                - "**/*"
-            include:
-                - build/Products
+            patterns:
+                - "!**/*"
+                - "build/Products"
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${self:provider.stage}] List Products"
+        description: "[${sls:stage}] List Products"
         events:
             - httpApi:
                 path: /products
                 method: get
-                cors: true
 
 resources:
     Resources:
         ProductsTable:
             Type: AWS::DynamoDB::Table
             Properties:
-                TableName: ${self:custom.productsTableName}
+                TableName: ${self:custom.tableName}
                 AttributeDefinitions:
                     - AttributeName: sku
                       AttributeType: S
