@@ -1,6 +1,6 @@
 service: swift-sprinter-rest-api
 variablesResolutionMode: 20210326
-frameworkVersion: '3'
+frameworkVersion: '2'
 configValidationMode: warn
 
 package:

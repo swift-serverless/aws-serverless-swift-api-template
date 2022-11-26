@@ -2,7 +2,7 @@
 
 [![Swift 5.7](https://img.shields.io/badge/Swift-5.7-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
 
-This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as development language.
+This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as a development language.
 
 ## Product API Example
 
@@ -37,14 +37,14 @@ More details of the API are described in [swagger.json](swagger.json).
 
 The file can be imported in popular tool such as PostMan.
 
-Be sure to update the `"host": "<BASE_URL>"` with the url provided during the deployment.
+Be sure to update the `"host": "<BASE_URL>"` with the URL provided during the deployment.
 
 The full `swagger-doc.html` has been generated using `pretty-swag`
 
 ## Serverless architecture
 
 The architecture is based on the classical AWS Serverless stack: APIGateway, Lambda and DynamoDB.
-- `APIGateway`: acts as a `proxy` for the `Lambda` and exposing it to the internet.
+- `APIGateway`: acts as a `proxy` for the `Lambda` and exposes it to the internet.
 - `Lambda`: is the computational layer.
 - `DynamoDB`: is the AWS `NoSQL` database
 
@@ -59,13 +59,20 @@ Advantages:
 The application uses [swift-aws-lambda-runtime](https://github.com/swift-server/swift-aws-lambda-runtime/) as AWS Custom Lambda Runtime and acts as a presentation layer of the DynamoDB content providing a REST API.
 
 The following frameworks are used:
-- [swift-aws-lambda-runtime](https://github.com/swift-server/swift-aws-lambda-runtime/): Implements the AWS Custom Runtime usin Swift NIO.
+- [swift-aws-lambda-runtime](https://github.com/swift-server/swift-aws-lambda-runtime/): Implements the AWS Custom Runtime using Swift NIO.
 - [aws-sdk-swift](https://github.com/swift-aws/aws-sdk-swift): Interacts with DynamoDB
 
 ## Requirements
 
 - Install [Docker](https://docs.docker.com/install/)
-- Install [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/)
+- Install [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/) version 3
+
+```
+Framework Core: 3.25.0 (standalone)
+Plugin: 6.2.2
+SDK: 4.3.2
+```
+
 - Ensure your AWS Account has the right [credentials](https://www.serverless.com/framework/docs/providers/aws/guide/credentials/) to deploy a Serverless stack.
 - Clone this repository. From the command line type:
 
@@ -121,9 +128,49 @@ Rebuild the code and update the Lambda to your AWS using Serverless:
 
 ## Remove
 
-To remove the deployment use:
+To remove the deployment using:
 ```
 serverless remove
 ```
 
 ![](images/remove.png)
+
+## Troubleshooting
+
+- ### The Serverless version (2.40.0) does not satisfy the "frameworkVersion" (3) in serverless.yml
+
+If during the deployment, the console prints the following message:
+
+```
+Serverless Error ----------------------------------------
+ 
+  The Serverless version (2.40.0) does not satisfy the "frameworkVersion" (3) in serverless.yml
+ 
+  Get Support --------------------------------------------
+     Docs:          docs.serverless.com
+     Bugs:          github.com/serverless/serverless/issues
+     Issues:        forum.serverless.com
+ 
+  Your Environment Information ---------------------------
+     Operating System:          darwin
+     Node Version:              14.4.0
+     Framework Version:         2.40.0 (standalone)
+     Plugin Version:            4.5.3
+     SDK Version:               4.2.2
+     Components Version:        3.9.2
+```
+
+Check the version of Serverless Framework installed in your environment:
+```bash
+sls -v
+```
+
+```
+Framework Core: 2.40.0 (standalone)
+Plugin: 4.5.3
+SDK: 4.2.2
+Components: 3.9.2
+```
+
+It's recommended to [upgrade to version 3](https://www.serverless.com/framework/docs/guides/upgrading-v3) the Serverless Framework. 
+In case you want to use version `2` make sure to override the content of `serverless.yml` with the content of `serverless-v2.yml`.
