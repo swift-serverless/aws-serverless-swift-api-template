@@ -133,6 +133,8 @@ To remove the deployment:
 ./remove.sh
 ```
 
+![](images/remove.png)
+
 ## arm64 M1 Graviton Support
 
 If the project is built with an M1 processor, then the AWS Lambda will be deployed on the `arm64` architecture.
@@ -140,8 +142,6 @@ If the project is built with an M1 processor, then the AWS Lambda will be deploy
 ## amd64/x86_64 Support
 
 If the project is built with an Intel processor, then the AWS Lambda will be deployed on the `x86_64` architecture.
-
-![](images/remove.png)
 
 ## Troubleshooting
 
