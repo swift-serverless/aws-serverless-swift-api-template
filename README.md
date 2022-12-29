@@ -100,7 +100,7 @@ This program built for i386-apple-darwin11.3.0
 ## Build
 
 Use the following command to build the code before using the serverless commands:
-```
+```bash
 ./build.sh
 ```
 
@@ -109,7 +109,7 @@ Use the following command to build the code before using the serverless commands
 ## Deploy
 
 Deploy the full solution to your AWS using Serverless:
-```
+```bash
 ./deploy.sh
 ```
 
@@ -120,7 +120,7 @@ After the deployment is completed, the URL of the website is provided by the Ser
 ## Update
 
 Rebuild the code and update the Lambda to your AWS using Serverless:
-```
+```bash
 ./update.sh
 ```
 
@@ -128,14 +128,23 @@ Rebuild the code and update the Lambda to your AWS using Serverless:
 
 ## Remove
 
-To remove the deployment using:
+To remove the deployment:
+```bash
+./remove.sh
 ```
-serverless remove
-```
+
+## arm64 M1 Graviton Support
+
+If the project is built with an M1 processor, then the AWS Lambda will be deployed on the `arm64` architecture.
+
+## amd64/x86_64 Support
+
+If the project is built with an Intel processor, then the AWS Lambda will be deployed on the `x86_64` architecture.
 
 ![](images/remove.png)
 
 ## Troubleshooting
+
 
 - ### The Serverless version (2.40.0) does not satisfy the "frameworkVersion" (3) in serverless.yml
 

@@ -14,11 +14,11 @@ provider:
     httpApi:
         payload: '2.0'
         cors: true
-    # Use provided.al2 if you build with M1, provided if you build with x86_64
-    runtime: provided.al2
+    # Change to provided.al2 if you build with M1
+    runtime: provided
     lambdaHashingVersion: "20201221"
-    # Use arm64 if you build with M1, or x86_64 if you build with intel
-    architecture: arm64
+    # Change to arm64 if you build with M1
+    architecture: x86_64
     environment:
         PRODUCTS_TABLE_NAME: '${self:custom.tableName}'
     iam:
