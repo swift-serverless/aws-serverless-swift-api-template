@@ -25,11 +25,10 @@ final class APIGatewayTests: XCTestCase {
         
         let decoder = JSONDecoder()
         do {
-            let event = try decoder.decode(APIGateway.Request.self, from: data)
+            let event = try decoder.decode(APIGatewayV2Request.self, from: data)
             
             XCTAssertNotNil(event.headers)
             XCTAssertNotNil(event.body)
-            XCTAssertNotNil(event.multiValueHeaders)
         } catch {
             print(error)
             XCTFail()

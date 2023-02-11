@@ -1,5 +1,4 @@
 service: swift-sprinter-rest-api
-variablesResolutionMode: 20210326
 frameworkVersion: '3'
 configValidationMode: warn
 
@@ -16,7 +15,6 @@ provider:
         cors: true
     # Change to provided.al2 if you build with M1
     runtime: provided
-    lambdaHashingVersion: "20201221"
     # Change to arm64 if you build with M1
     architecture: x86_64
     environment:

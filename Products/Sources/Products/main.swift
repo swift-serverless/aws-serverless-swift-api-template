@@ -12,10 +12,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+import AWSLambdaRuntimeCore
 import AWSLambdaRuntime
 
-#if compiler(>=5.5) && canImport(_Concurrency)
-    Lambda.run(AsyncProductLambda.init)
-#else
-    Lambda.run(ProductLambda.init)
-#endif
+AsyncProductLambda.main()

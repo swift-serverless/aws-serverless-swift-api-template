@@ -15,6 +15,7 @@
 import SotoDynamoDB
 import AWSLambdaEvents
 import AWSLambdaRuntime
+import AWSLambdaRuntimeCore
 import AsyncHTTPClient
 import Logging
 import NIO
@@ -29,13 +30,10 @@ enum Operation: String {
 }
 
 struct EmptyResponse: Codable {}
-
-#if compiler(>=5.5) && canImport(_Concurrency)
-
-struct AsyncProductLambda: AsyncLambdaHandler {
+struct AsyncProductLambda: LambdaHandler {
     
-    typealias In = APIGateway.V2.Request
-    typealias Out = APIGateway.V2.Response
+    typealias Event = APIGatewayV2Request
+    typealias Output = APIGatewayV2Response
     
     let dbTimeout: Int64 = 30
     let region: Region
@@ -61,7 +59,7 @@ struct AsyncProductLambda: AsyncLambdaHandler {
         return tableName
     }
     
-    init(context: Lambda.InitializationContext) throws {
+    init(context: LambdaInitializationContext) async throws {
         
         guard let handler = Lambda.env("_HANDLER"),
             let operation = Operation(rawValue: handler) else {
@@ -92,9 +90,7 @@ struct AsyncProductLambda: AsyncLambdaHandler {
         )
     }
     
-    func handle(event: AWSLambdaEvents.APIGateway.V2.Request, context: AWSLambdaRuntimeCore.Lambda.Context) async throws -> AWSLambdaEvents.APIGateway.V2.Response {
-        return await AsyncProductLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
+    func handle(_ event: AWSLambdaEvents.APIGatewayV2Request, context: AWSLambdaRuntimeCore.LambdaContext) async throws -> AWSLambdaEvents.APIGatewayV2Response {
+       return await AsyncProductLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
     }
 }
-
-#endif

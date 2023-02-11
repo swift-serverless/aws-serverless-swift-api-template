@@ -27,17 +27,15 @@ import AWSLambdaRuntime
 import Logging
 import NIO
 
-#if compiler(>=5.5) && canImport(_Concurrency)
-
 struct AsyncProductLambdaHandler {
     
-    typealias In = APIGateway.V2.Request
-    typealias Out = APIGateway.V2.Response
+    typealias Event = APIGatewayV2Request
+    typealias Output = APIGatewayV2Response
     
     let service: ProductService
     let operation: Operation
     
-    func handle(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func handle(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         
         switch self.operation {
         case .create:
@@ -53,66 +51,64 @@ struct AsyncProductLambdaHandler {
         }
     }
     
-    func createLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func createLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         guard let product: Product = try? event.bodyObject() else {
             let error = APIError.invalidRequest
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
             let result = try await service.createItem(product: product)
-            return APIGateway.V2.Response(with: result, statusCode: .created)
+            return APIGatewayV2Response(with: result, statusCode: .created)
         } catch {
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
     }
     
-    func readLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func readLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         guard let sku = event.pathParameters?["sku"] else {
             let error = APIError.invalidRequest
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
             let result = try await service.readItem(key: sku)
-            return APIGateway.V2.Response(with: result, statusCode: .ok)
+            return APIGatewayV2Response(with: result, statusCode: .ok)
         } catch {
-            return APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return APIGatewayV2Response(with: error, statusCode: .notFound)
         }
     }
     
-    func updateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func updateLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         guard let product: Product = try? event.bodyObject() else {
             let error = APIError.invalidRequest
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
             let result = try await service.updateItem(product: product)
-            return APIGateway.V2.Response(with: result, statusCode: .ok)
+            return APIGatewayV2Response(with: result, statusCode: .ok)
         } catch {
-            return APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return APIGatewayV2Response(with: error, statusCode: .notFound)
         }
     }
     
-    func deleteUpdateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func deleteUpdateLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         guard let sku = event.pathParameters?["sku"] else {
             let error = APIError.invalidRequest
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
             try await service.deleteItem(key: sku)
-            return APIGateway.V2.Response(with: EmptyResponse(), statusCode: .ok)
+            return APIGatewayV2Response(with: EmptyResponse(), statusCode: .ok)
         } catch {
-            return APIGateway.V2.Response(with: error, statusCode: .notFound)
+            return APIGatewayV2Response(with: error, statusCode: .notFound)
         }
     }
     
-    func listUpdateLambdaHandler(context: Lambda.Context, event: APIGateway.V2.Request) async -> APIGateway.V2.Response {
+    func listUpdateLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         do {
             let result = try await service.listItems()
-            return APIGateway.V2.Response(with: result, statusCode: .ok)
+            return APIGatewayV2Response(with: result, statusCode: .ok)
         } catch {
-            return APIGateway.V2.Response(with: error, statusCode: .forbidden)
+            return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
     }
 }
-
-#endif

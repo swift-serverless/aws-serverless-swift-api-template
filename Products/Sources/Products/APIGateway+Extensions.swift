@@ -23,7 +23,7 @@ public enum APIError: Error {
     case invalidHandler
 }
 
-extension APIGateway.V2.Request {
+extension APIGatewayV2Request {
     
     static private let decoder = JSONDecoder()
     
@@ -37,7 +37,7 @@ extension APIGateway.V2.Request {
     }
 }
 
-extension APIGateway.V2.Response {
+extension APIGatewayV2Response {
     
     private static let encoder = JSONEncoder()
     
@@ -48,24 +48,24 @@ extension APIGateway.V2.Response {
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PUT,DELETE",
         "Access-Control-Allow-Credentials": "true",
     ]
-    
+     
     public init(with error: Error, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         self.init(
             statusCode: statusCode,
-            headers: APIGateway.V2.Response.defaultHeaders,
+            headers: APIGatewayV2Response.defaultHeaders,
             body: "{\"message\":\"\(String(describing: error))\"}",
             isBase64Encoded: false
         )
     }
     
-    public init<Out: Encodable>(with object: Out, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
+    public init<Output: Encodable>(with object: Output, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         var body: String = "{}"
         if let data = try? Self.encoder.encode(object) {
             body = String(data: data, encoding: .utf8) ?? body
         }
         self.init(
             statusCode: statusCode,
-            headers: APIGateway.V2.Response.defaultHeaders,
+            headers: APIGatewayV2Response.defaultHeaders,
             body: body,
             isBase64Encoded: false
         )
