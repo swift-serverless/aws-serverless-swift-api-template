@@ -46,86 +46,83 @@ extension String {
     }
 }
 
-public class ProductService {
+public protocol DynamoDBItem: Codable {
+    var key: String { get set }
+    var createdAt: String? { get set }
+    var updatedAt: String? { get set }
+}
+
+public class DynamoDBService<T: DynamoDBItem> {
     
-    enum ProductError: Error {
+    enum ServiceError: Error {
         case notFound
     }
     
     let db: DynamoDB
+    public let keyName: String
     let tableName: String
     
-    public init(db: DynamoDB, tableName: String) {
+    public init(db: DynamoDB, tableName: String, keyName: String) {
         self.db = db
         self.tableName = tableName
+        self.keyName = keyName
     }
 }
 
-public extension ProductService {
+public extension DynamoDBService {
     
-    func createItem(product: Product) async throws -> Product {
-        var product = product
+    func createItem(item: T) async throws -> T {
+        var item = item
         let date = Date()
-        product.createdAt = date.iso8601
-        product.updatedAt = date.iso8601
-        let input = DynamoDB.PutItemCodableInput(item: product, tableName: tableName)
-        
-        let _ = try await db.putItem(input)
-        return try await readItem(key: product.sku)
-    }
-    
-    func readItem(key: String) async throws -> Product {
-        let input = DynamoDB.GetItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
+        item.createdAt = date.iso8601
+        item.updatedAt = date.iso8601
+        let input = DynamoDB.PutItemCodableInput(
+            conditionExpression: "attribute_not_exists(\(keyName))",
+            item: item,
             tableName: tableName
         )
-        let data = try await db.getItem(input, type: Product.self)
-        guard let product = data.item else {
-            throw ProductError.notFound
-        }
-        return product
+        let _ = try await db.putItem(input)
+        return try await readItem(key: item.key)
     }
     
-    func updateItem(product: Product) async throws -> Product {
-        var product = product
+    func readItem(key: String) async throws -> T {
+        let input = DynamoDB.GetItemInput(
+            key: [keyName: DynamoDB.AttributeValue.s(key)],
+            tableName: tableName
+        )
+        let data = try await db.getItem(input, type: T.self)
+        guard let item = data.item else {
+            throw ServiceError.notFound
+        }
+        return item
+    }
+    
+    func updateItem(item: T) async throws -> T {
+        var item = item
         let date = Date()
-        let updatedAt = date.iso8601
-        product.updatedAt = date.iso8601
-        
-        let input = DynamoDB.UpdateItemInput(
-            conditionExpression: "attribute_exists(#createdAt)",
-            expressionAttributeNames: [
-                "#name": Product.Field.name,
-                "#description": Product.Field.description,
-                "#updatedAt": Product.Field.updatedAt,
-                "#createdAt": Product.Field.createdAt
-            ],
-            expressionAttributeValues: [
-                ":name": DynamoDB.AttributeValue.s(product.name),
-                ":description": DynamoDB.AttributeValue.s(product.description),
-                ":updatedAt": DynamoDB.AttributeValue.s(updatedAt)
-            ],
-            key: [Product.Field.sku: DynamoDB.AttributeValue.s(product.sku)],
-            returnValues: DynamoDB.ReturnValue.allNew,
+        item.updatedAt = date.iso8601
+        let input = DynamoDB.UpdateItemCodableInput(
+            conditionExpression: "attribute_exists(createdAt)",
+            key: [keyName],
             tableName: tableName,
-            updateExpression: "SET #name = :name, #description = :description, #updatedAt = :updatedAt"
+            updateItem: item
         )
         let _ = try await db.updateItem(input)
-        return try await readItem(key: product.sku)
+        return try await readItem(key: item.key)
     }
     
     func deleteItem(key: String) async throws {
         let input = DynamoDB.DeleteItemInput(
-            key: [Product.Field.sku: DynamoDB.AttributeValue.s(key)],
+            key: [keyName: DynamoDB.AttributeValue.s(key)],
             tableName: tableName
         )
         let _ = try await db.deleteItem(input)
         return
     }
     
-    func listItems() async throws -> [Product] {
+    func listItems() async throws -> [T] {
         let input = DynamoDB.ScanInput(tableName: tableName)
-        let data = try await db.scan(input, type: Product.self)
+        let data = try await db.scan(input, type: T.self)
         return data.items ?? []
     }
 }

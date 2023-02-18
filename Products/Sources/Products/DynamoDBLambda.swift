@@ -19,18 +19,28 @@ import AWSLambdaRuntimeCore
 import AsyncHTTPClient
 import Logging
 import NIO
-import ProductService
+import DynamoDBService
+import Foundation
 
 enum Operation: String {
-    case create = "build/Products.create"
-    case read = "build/Products.read"
-    case update = "build/Products.update"
-    case delete = "build/Products.delete"
-    case list = "build/Products.list"
+    case create = "create"
+    case read = "read"
+    case update = "update"
+    case delete = "delete"
+    case list = "list"
+    
+    init?(handler: String) {
+        guard let value = handler.split(separator: ".").last,
+              let operation = Operation(rawValue: String(value))
+            else {
+            return nil
+        }
+        self = operation
+    }
 }
 
 struct EmptyResponse: Codable {}
-struct AsyncProductLambda: LambdaHandler {
+struct DynamoDBLambda<T: DynamoDBItem>: LambdaHandler {
     
     typealias Event = APIGatewayV2Request
     typealias Output = APIGatewayV2Response
@@ -38,8 +48,9 @@ struct AsyncProductLambda: LambdaHandler {
     let dbTimeout: Int64 = 30
     let region: Region
     let db: SotoDynamoDB.DynamoDB
-    let service: ProductService
+    let service: DynamoDBService<T>
     let tableName: String
+    let keyName: String
     let operation: Operation
     var httpClient: HTTPClient
     
@@ -53,8 +64,15 @@ struct AsyncProductLambda: LambdaHandler {
     }
     
     static func tableName() throws -> String {
-        guard let tableName = Lambda.env("PRODUCTS_TABLE_NAME") else {
+        guard let tableName = Lambda.env("DYNAMO_DB_TABLE_NAME") else {
             throw APIError.tableNameNotFound
+        }
+        return tableName
+    }
+    
+    static func keyName() throws -> String {
+        guard let tableName = Lambda.env("DYNAMO_DB_KEY") else {
+            throw APIError.keyNameNotFound
         }
         return tableName
     }
@@ -62,7 +80,7 @@ struct AsyncProductLambda: LambdaHandler {
     init(context: LambdaInitializationContext) async throws {
         
         guard let handler = Lambda.env("_HANDLER"),
-            let operation = Operation(rawValue: handler) else {
+            let operation = Operation(handler: handler) else {
                 throw APIError.invalidHandler
         }
         self.operation = operation
@@ -83,14 +101,16 @@ struct AsyncProductLambda: LambdaHandler {
         let awsClient = AWSClient(httpClientProvider: .shared(self.httpClient))
         self.db = SotoDynamoDB.DynamoDB(client: awsClient, region: region)
         self.tableName = try Self.tableName()
+        self.keyName = try Self.keyName()
 
-        self.service = ProductService(
+        self.service = DynamoDBService<T>(
             db: db,
-            tableName: tableName
+            tableName: tableName,
+            keyName: keyName
         )
     }
     
     func handle(_ event: AWSLambdaEvents.APIGatewayV2Request, context: AWSLambdaRuntimeCore.LambdaContext) async throws -> AWSLambdaEvents.APIGatewayV2Response {
-       return await AsyncProductLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
+        return await DynamoDBLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
     }
 }

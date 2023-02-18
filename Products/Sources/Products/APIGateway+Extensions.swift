@@ -19,6 +19,7 @@ import class Foundation.JSONDecoder
 public enum APIError: Error {
     case invalidItem
     case tableNameNotFound
+    case keyNameNotFound
     case invalidRequest
     case invalidHandler
 }

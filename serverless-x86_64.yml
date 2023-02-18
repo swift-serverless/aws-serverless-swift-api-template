@@ -7,9 +7,11 @@ package:
 
 custom:
     tableName: 'products-table-${sls:stage}'
+    keyName: 'sku'
 
 provider:
     name: aws
+    region: eu-west-1
     httpApi:
         payload: '2.0'
         cors: true
@@ -18,7 +20,8 @@ provider:
     # Change to arm64 if you build with M1
     architecture: x86_64
     environment:
-        PRODUCTS_TABLE_NAME: '${self:custom.tableName}'
+        DYNAMO_DB_TABLE_NAME: '${self:custom.tableName}'
+        DYNAMO_DB_KEY: '${self:custom.keyName}'
     iam:
         role:
             statements:
@@ -130,9 +133,9 @@ resources:
             Properties:
                 TableName: ${self:custom.tableName}
                 AttributeDefinitions:
-                    - AttributeName: sku
+                    - AttributeName: ${self:custom.keyName}
                       AttributeType: S
                 KeySchema:
-                    - AttributeName: sku
+                    - AttributeName: ${self:custom.keyName}
                       KeyType: HASH
                 BillingMode: PAY_PER_REQUEST

@@ -12,7 +12,27 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+import Foundation
 import AWSLambdaRuntimeCore
 import AWSLambdaRuntime
+import DynamoDBService
 
-AsyncProductLambda.main()
+public struct Product: Codable {
+    public var key: String
+    public let name: String
+    public let description: String
+    public var createdAt: String?
+    public var updatedAt: String?
+    
+    public enum CodingKeys: String, CodingKey {
+        case key = "sku"
+        case name
+        case description
+        case createdAt
+        case updatedAt
+    }
+}
+
+extension Product: DynamoDBItem { }
+
+DynamoDBLambda<Product>.main()
