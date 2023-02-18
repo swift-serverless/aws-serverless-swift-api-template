@@ -32,12 +32,18 @@ let package = Package(
                  .product(name: "Logging", package: "swift-log")
             ]
         ),
+        .target(
+            name: "DynamoDBLambda",
+             dependencies: [
+                .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
+                .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
+               "DynamoDBService"
+            ]
+        ),
         .executableTarget(
             name: "Products",
              dependencies: [
-                 .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
-                 .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
-                "DynamoDBService"
+                "DynamoDBLambda"
             ]
         ),
         .testTarget(

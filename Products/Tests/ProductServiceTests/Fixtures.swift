@@ -20,6 +20,10 @@ let jsonAPIGatewayProxyEvent = """
   "path": "/path/to/resource",
   "httpMethod": "POST",
   "isBase64Encoded": true,
+  "version": "2.0",
+  "routeKey": "routeKey",
+  "rawPath": "rawPath",
+  "rawQueryString": "rawQueryString",
   "queryStringParameters": {
     "foo": "bar"
   },
@@ -130,11 +134,16 @@ let jsonAPIGatewayProxyEvent = """
       "userAgent": "Custom User Agent String",
       "user": null
     },
-    "path": "/prod/path/to/resource",
+    "domainName": "domainName",
+    "domainPrefix": "domainPrefix",
     "resourcePath": "/{proxy+}",
-    "httpMethod": "POST",
+    "http": {
+        "method": "POST",
+        "path": "/prod/path/to/resource",
+        "protocol": "HTTP/1.1",
+        "sourceIp": "127.0.0.1"
+    },
     "apiId": "1234567890",
-    "protocol": "HTTP/1.1"
   }
 }
 """

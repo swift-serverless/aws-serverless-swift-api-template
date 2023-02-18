@@ -1,4 +1,4 @@
-//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -16,7 +16,16 @@ import AWSLambdaEvents
 import class Foundation.JSONEncoder
 import class Foundation.JSONDecoder
 
-public enum APIError: Error {
+extension APIGatewayV2Request {
+    public func pathParameter(_ param: String) -> Int? {
+        guard let value = pathParameters?[param] else {
+            return nil
+        }
+        return Int(value)
+    }
+}
+
+enum APIError: Error {
     case invalidItem
     case tableNameNotFound
     case keyNameNotFound
@@ -42,7 +51,7 @@ extension APIGatewayV2Response {
     
     private static let encoder = JSONEncoder()
     
-    public static let defaultHeaders = [
+    static let defaultHeaders = [
         "Content-Type": "application/json",
         //Security warning: XSS are enabled
         "Access-Control-Allow-Origin": "*",
@@ -50,7 +59,7 @@ extension APIGatewayV2Response {
         "Access-Control-Allow-Credentials": "true",
     ]
      
-    public init(with error: Error, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
+    init(with error: Error, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         self.init(
             statusCode: statusCode,
             headers: APIGatewayV2Response.defaultHeaders,
@@ -59,7 +68,7 @@ extension APIGatewayV2Response {
         )
     }
     
-    public init<Output: Encodable>(with object: Output, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
+    init<Output: Encodable>(with object: Output, statusCode: AWSLambdaEvents.HTTPResponseStatus) {
         var body: String = "{}"
         if let data = try? Self.encoder.encode(object) {
             body = String(data: data, encoding: .utf8) ?? body
@@ -72,3 +81,5 @@ extension APIGatewayV2Response {
         )
     }
 }
+
+struct EmptyResponse: Codable {}

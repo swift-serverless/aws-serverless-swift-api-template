@@ -1,4 +1,4 @@
-//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -13,27 +13,9 @@
 //    limitations under the License.
 
 import Foundation
-import AWSLambdaRuntimeCore
-import AWSLambdaRuntime
-import DynamoDBService
-import DynamoDBLambda
 
-struct Product: Codable {
-    public var key: String
-    public let name: String
-    public let description: String
-    public var createdAt: String?
-    public var updatedAt: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case key = "sku"
-        case name
-        case description
-        case createdAt
-        case updatedAt
-    }
+public protocol DynamoDBItem: Codable {
+    var key: String { get set }
+    var createdAt: String? { get set }
+    var updatedAt: String? { get set }
 }
-
-extension Product: DynamoDBItem { }
-
-DynamoDBLambda<Product>.main()

@@ -1,4 +1,4 @@
-//    Copyright 2022 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -12,15 +12,10 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
+import AWSLambdaEvents
 import AWSLambdaRuntime
-import NIO
 import DynamoDBService
 import Logging
-import AWSLambdaEvents
 
 struct DynamoDBLambdaHandler<T: DynamoDBItem> {
     
@@ -64,12 +59,12 @@ struct DynamoDBLambdaHandler<T: DynamoDBItem> {
     }
     
     func readLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
-        guard let sku = event.pathParameters?[keyName] else {
+        guard let key = event.pathParameters?[keyName] else {
             let error = APIError.invalidRequest
             return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
-            let result = try await service.readItem(key: sku)
+            let result = try await service.readItem(key: key)
             return APIGatewayV2Response(with: result, statusCode: .ok)
         } catch {
             return APIGatewayV2Response(with: error, statusCode: .notFound)
@@ -90,12 +85,12 @@ struct DynamoDBLambdaHandler<T: DynamoDBItem> {
     }
     
     func deleteLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
-        guard let sku = event.pathParameters?[keyName] else {
+        guard let key = event.pathParameters?[keyName] else {
             let error = APIError.invalidRequest
             return APIGatewayV2Response(with: error, statusCode: .forbidden)
         }
         do {
-            try await service.deleteItem(key: sku)
+            try await service.deleteItem(key: key)
             return APIGatewayV2Response(with: EmptyResponse(), statusCode: .ok)
         } catch {
             return APIGatewayV2Response(with: error, statusCode: .notFound)
@@ -104,7 +99,9 @@ struct DynamoDBLambdaHandler<T: DynamoDBItem> {
     
     func listLambdaHandler(context: AWSLambdaRuntimeCore.LambdaContext, event: APIGatewayV2Request) async -> APIGatewayV2Response {
         do {
-            let result = try await service.listItems()
+            let key = event.pathParameters?["exclusiveStartKey"]
+            let limit: Int? = event.pathParameter("limit")
+            let result = try await service.listItems(key: key, limit: limit)
             return APIGatewayV2Response(with: result, statusCode: .ok)
         } catch {
             return APIGatewayV2Response(with: error, statusCode: .forbidden)

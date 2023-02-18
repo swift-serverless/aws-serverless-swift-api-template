@@ -30,8 +30,7 @@ final class APIGatewayTests: XCTestCase {
             XCTAssertNotNil(event.headers)
             XCTAssertNotNil(event.body)
         } catch {
-            print(error)
-            XCTFail()
+            XCTFail("\(error)")
         }
     }
 

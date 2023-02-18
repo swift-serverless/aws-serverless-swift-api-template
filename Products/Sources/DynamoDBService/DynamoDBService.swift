@@ -1,4 +1,4 @@
-//    Copyright 2020 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -15,42 +15,6 @@
 import SotoDynamoDB
 import Foundation
 import NIO
-
-extension DateFormatter {
-    static var iso8061: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        return formatter
-    }
-}
-
-extension Date {
-    var iso8601: String {
-        let formatter = DateFormatter.iso8061
-        return formatter.string(from: self)
-    }
-}
-
-extension String {
-    var iso8601: Date? {
-        let formatter = DateFormatter.iso8061
-        return formatter.date(from: self)
-    }
-    
-    var timeIntervalSince1970String: String? {
-        guard let timeInterval = self.iso8601?.timeIntervalSince1970 else {
-            return nil
-        }
-        return "\(timeInterval)"
-    }
-}
-
-public protocol DynamoDBItem: Codable {
-    var key: String { get set }
-    var createdAt: String? { get set }
-    var updatedAt: String? { get set }
-}
 
 public class DynamoDBService<T: DynamoDBItem> {
     
@@ -120,9 +84,27 @@ public extension DynamoDBService {
         return
     }
     
-    func listItems() async throws -> [T] {
-        let input = DynamoDB.ScanInput(tableName: tableName)
+    struct ListResponse<T: Codable>: Codable {
+        let items: [T]
+        let lastEvaluatedKey: String?
+    }
+    
+    func listItems(key: String?, limit: Int?) async throws -> ListResponse<T> {
+        var exclusiveStartKey: [String: DynamoDB.AttributeValue]?
+        if let key {
+            exclusiveStartKey = [keyName: DynamoDB.AttributeValue.s(key)]
+        }
+        let input = DynamoDB.ScanInput(
+            exclusiveStartKey: exclusiveStartKey,
+            limit: limit,
+            tableName: tableName
+        )
         let data = try await db.scan(input, type: T.self)
-        return data.items ?? []
+        if let lastEvaluatedKeyShape = data.lastEvaluatedKey?[keyName],
+           case .s(let lastEvaluatedKey) = lastEvaluatedKeyShape {
+            return ListResponse(items: data.items ?? [], lastEvaluatedKey: lastEvaluatedKey)
+        } else {
+            return ListResponse(items: data.items ?? [], lastEvaluatedKey: nil)
+        }
     }
 }

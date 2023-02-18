@@ -1,4 +1,4 @@
-//    Copyright 2022 (c) Andrea Scuderi - https://github.com/swift-sprinter
+//    Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -14,36 +14,14 @@
 
 import SotoDynamoDB
 import AWSLambdaEvents
-import AWSLambdaRuntime
 import AWSLambdaRuntimeCore
 import AsyncHTTPClient
-import Logging
-import NIO
 import DynamoDBService
-import Foundation
 
-enum Operation: String {
-    case create = "create"
-    case read = "read"
-    case update = "update"
-    case delete = "delete"
-    case list = "list"
+public struct DynamoDBLambda<T: DynamoDBItem>: LambdaHandler {
     
-    init?(handler: String) {
-        guard let value = handler.split(separator: ".").last,
-              let operation = Operation(rawValue: String(value))
-            else {
-            return nil
-        }
-        self = operation
-    }
-}
-
-struct EmptyResponse: Codable {}
-struct DynamoDBLambda<T: DynamoDBItem>: LambdaHandler {
-    
-    typealias Event = APIGatewayV2Request
-    typealias Output = APIGatewayV2Response
+    public typealias Event = APIGatewayV2Request
+    public typealias Output = APIGatewayV2Response
     
     let dbTimeout: Int64 = 30
     let region: Region
@@ -77,7 +55,7 @@ struct DynamoDBLambda<T: DynamoDBItem>: LambdaHandler {
         return tableName
     }
     
-    init(context: LambdaInitializationContext) async throws {
+    public init(context: LambdaInitializationContext) async throws {
         
         guard let handler = Lambda.env("_HANDLER"),
             let operation = Operation(handler: handler) else {
@@ -110,7 +88,7 @@ struct DynamoDBLambda<T: DynamoDBItem>: LambdaHandler {
         )
     }
     
-    func handle(_ event: AWSLambdaEvents.APIGatewayV2Request, context: AWSLambdaRuntimeCore.LambdaContext) async throws -> AWSLambdaEvents.APIGatewayV2Response {
+    public func handle(_ event: AWSLambdaEvents.APIGatewayV2Request, context: AWSLambdaRuntimeCore.LambdaContext) async throws -> AWSLambdaEvents.APIGatewayV2Response {
         return await DynamoDBLambdaHandler(service: service, operation: operation).handle(context: context, event: event)
     }
 }
