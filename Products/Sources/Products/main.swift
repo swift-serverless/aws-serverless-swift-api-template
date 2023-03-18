@@ -13,10 +13,8 @@
 //    limitations under the License.
 
 import Foundation
-import AWSLambdaRuntimeCore
-import AWSLambdaRuntime
-import DynamoDBService
-import DynamoDBLambda
+import BreezeLambdaAPI
+import BreezeDynamoDBService
 
 struct Product: Codable {
     public var key: String
@@ -34,6 +32,6 @@ struct Product: Codable {
     }
 }
 
-extension Product: DynamoDBItem { }
+extension Product: BreezeCodable { }
 
-DynamoDBLambda<Product>.main()
+BreezeLambdaAPI<Product>.main()

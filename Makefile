@@ -71,6 +71,7 @@ build_lambda:
 	docker run \
 			--rm \
 			--volume "$(MOUNT_ROOT)/:/src" \
+			--volume "$(MOUNT_ROOT)/../Breeze:/Breeze" \
 			--workdir "/src/$(DOCKER_PROJECT_PATH)" \
 			$(SWIFT_DOCKER_IMAGE) \
 			/bin/bash -c "swift build -c $(SWIFT_CONFIGURATION) -Xswiftc -g"
@@ -80,6 +81,7 @@ docker_bash:
 			-it \
 			--rm \
 			--volume "$(MOUNT_ROOT):/src" \
+			--volume "$(MOUNT_ROOT)/../Breeze:/Breeze" \
 			--workdir "/src/" \
 			$(SWIFT_DOCKER_IMAGE) \
 			/bin/bash
