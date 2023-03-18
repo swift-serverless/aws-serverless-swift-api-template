@@ -1,5 +1,2 @@
 make docker_build
-make package_layer
-make build_lambda
-make cp_layer_to_sls_build_local
-make cp_lambda_to_sls_build_local
+make archive_lambda

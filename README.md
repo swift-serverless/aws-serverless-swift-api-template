@@ -1,8 +1,8 @@
 # AWS Serverless Swift API Template
 
-[![Swift 5.7.2](https://img.shields.io/badge/Swift-5.7.2-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
+[![Swift 5.7.3](https://img.shields.io/badge/Swift-5.7.3-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
 
-This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as a development language.
+This package demonstrates how to write a Scalable REST API with the Serverless stack by using only Swift as a development language.
 
 ## Product API Example
 
@@ -35,18 +35,16 @@ The API implements the following schema:
 
 More details of the API are described in [swagger.json](swagger.json).
 
-The file can be imported in popular tool such as PostMan.
+The file can be imported into popular tools such as PostMan.
 
 Be sure to update the `"host": "<BASE_URL>"` with the URL provided during the deployment.
-
-The full `swagger-doc.html` has been generated using `pretty-swag`
 
 ## Serverless architecture
 
 The architecture is based on the classical AWS Serverless stack: APIGateway, Lambda and DynamoDB.
-- `APIGateway`: acts as a `proxy` for the `Lambda` and exposes it to the internet.
-- `Lambda`: is the computational layer.
-- `DynamoDB`: is the AWS `NoSQL` database
+- `APIGateway` acts as a `proxy` for `Lambda` and exposes it to the internet.
+- `Lambda` is the computational layer.
+- `DynamoDB` is the AWS `NoSQL` database
 
 Advantages:
 - Pay per use

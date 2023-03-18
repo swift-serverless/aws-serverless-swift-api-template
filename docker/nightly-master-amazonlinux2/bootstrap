@@ -1,3 +1,0 @@
-#!/bin/sh
-EXECUTABLE=$LAMBDA_TASK_ROOT/"$(echo $_HANDLER | cut -d. -f1)"
-$EXECUTABLE
