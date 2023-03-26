@@ -13,7 +13,7 @@ let package = Package(
         .executable(name: "Products", targets: ["Products"]),
     ],
     dependencies: [
-        .package(path: "../../Breeze"),
+        .package(url: "https://github.com/swift-sprinter/Breeze.git", from: "0.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

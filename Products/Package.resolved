@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "breeze",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-sprinter/Breeze.git",
+      "state" : {
+        "revision" : "9ddff777d3ab86344b4fae050041050cf3686ef0",
+        "version" : "0.1.0"
+      }
+    },
+    {
       "identity" : "jmespath.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/jmespath.swift.git",
@@ -113,8 +122,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "45167b8006448c79dda4b7bd604e07a034c15c49",
-        "version" : "2.48.0"
+        "revision" : "9b2848d76f5caad08b97e71a04345aa5bdb23a06",
+        "version" : "2.49.0"
       }
     },
     {
@@ -122,8 +131,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-extras.git",
       "state" : {
-        "revision" : "d75ed708d00353acf173ca23018b6bd46f949464",
-        "version" : "1.17.0"
+        "revision" : "cc1e5275079380c859417dbea8588531f1a90ec3",
+        "version" : "1.18.0"
       }
     },
     {
