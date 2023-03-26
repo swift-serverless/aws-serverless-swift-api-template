@@ -3,13 +3,15 @@ frameworkVersion: '3'
 configValidationMode: warn
 
 package:
-    individually: true
+    artifact: build/Products/Products.zip
 
 custom:
     tableName: 'products-table-${sls:stage}'
+    keyName: 'sku'
 
 provider:
     name: aws
+    region: eu-west-1
     httpApi:
         payload: '2.0'
         cors: true
@@ -18,7 +20,8 @@ provider:
     # Change to arm64 if you build with M1
     architecture: x86_64
     environment:
-        PRODUCTS_TABLE_NAME: '${self:custom.tableName}'
+        DYNAMO_DB_TABLE_NAME: '${self:custom.tableName}'
+        DYNAMO_DB_KEY: '${self:custom.keyName}'
     iam:
         role:
             statements:
@@ -40,83 +43,42 @@ provider:
                   Resource:
                     - { Fn::GetAtt: [ProductsTable, Arn] }
 
-layers:
-    swift-lambda-runtime:
-        path: ./build/swift-lambda-runtime
-        name: aws-swift-sprinter-lambda-runtime
-        description: AWS Lambda Custom Runtime for Swift-Sprinter   
-
 functions:
     createProduct:
-        handler: build/Products.create
-        package:
-            individually: true
-            patterns:
-                - "!**/*"
-                - "build/Products"
+        handler: create
         memorySize: 256
-        layers:
-           - { Ref: "SwiftDashlambdaDashruntimeLambdaLayer" }
         description: "[${sls:stage}] Create Product"
         events:
             - httpApi:
                 path: /products
                 method: post
     readProduct:
-        handler: build/Products.read
-        package:
-            individually: true
-            patterns:
-                - "!**/*"
-                - "build/Products"
+        handler: read
         memorySize: 256
-        layers:
-            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${sls:stage}] Get Product"
         events:
             - httpApi:
                 path: /products/{sku}
                 method: get
     updateProduct:
-        handler: build/Products.update
-        package:
-            individually: true
-            patterns:
-                - "!**/*"
-                - "build/Products"
+        handler: update
         memorySize: 256
-        layers:
-            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${sls:stage}] Update Product"
         events:
             - httpApi:
                 path: /products
                 method: put
     deleteProduct:
-        handler: build/Products.delete
-        package:
-            individually: true
-            patterns:
-                - "!**/*"
-                - build/Products
+        handler: delete
         memorySize: 256
-        layers:
-            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${sls:stage}] Delete Product"
         events:
             - httpApi:
                 path: /products/{sku}
                 method: delete
     listProducts:
-        handler: build/Products.list
-        package:
-            individually: true
-            patterns:
-                - "!**/*"
-                - "build/Products"
+        handler: list
         memorySize: 256
-        layers:
-            - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
         description: "[${sls:stage}] List Products"
         events:
             - httpApi:
@@ -130,9 +92,9 @@ resources:
             Properties:
                 TableName: ${self:custom.tableName}
                 AttributeDefinitions:
-                    - AttributeName: sku
+                    - AttributeName: ${self:custom.keyName}
                       AttributeType: S
                 KeySchema:
-                    - AttributeName: sku
+                    - AttributeName: ${self:custom.keyName}
                       KeyType: HASH
                 BillingMode: PAY_PER_REQUEST

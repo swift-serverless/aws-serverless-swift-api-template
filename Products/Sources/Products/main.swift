@@ -12,7 +12,26 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
-import AWSLambdaRuntimeCore
-import AWSLambdaRuntime
+import Foundation
+import BreezeLambdaAPI
+import BreezeDynamoDBService
 
-AsyncProductLambda.main()
+struct Product: Codable {
+    public var key: String
+    public let name: String
+    public let description: String
+    public var createdAt: String?
+    public var updatedAt: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case key = "sku"
+        case name
+        case description
+        case createdAt
+        case updatedAt
+    }
+}
+
+extension Product: BreezeCodable { }
+
+BreezeLambdaAPI<Product>.main()

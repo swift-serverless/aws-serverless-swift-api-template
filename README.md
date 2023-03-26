@@ -1,21 +1,40 @@
 # AWS Serverless Swift API Template
 
-[![Swift 5.7.2](https://img.shields.io/badge/Swift-5.7.2-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
+[![Swift 5.7.3](https://img.shields.io/badge/Swift-5.7.3-blue.svg)](https://swift.org/download/) [![docker amazonlinux2](https://img.shields.io/badge/docker-amazonlinux2-orange.svg)](https://swift.org/download/)
 
-This package demostrates how to write a Scalable REST API with the Serverless stack by using only Swift as a development language.
+This package demonstrates how to write a Scalable REST API with the Serverless stack by using only Swift as a development language.
 
-## Product API Example
+## Product API based on Breeze
 
-The example shows how to build a Rest API based on a `Product` swift class.
+The example shows how to build and deploy a Rest API based on a `Product` swift struct using [Breeze](https://github.com/swift-sprinter/Breeze.git)
+
+The following code is all you need to implement the engine of a Serverless Rest API in Swift.
+The Serverless Rest API implements a CRUD interface to store the `Product` in DynamoDB.
 
 ```swift
-public struct Product: Codable {
-    public let sku: String
+import Foundation
+import BreezeLambdaAPI
+import BreezeDynamoDBService
+
+struct Product: Codable {
+    public var key: String
     public let name: String
     public let description: String
     public var createdAt: String?
     public var updatedAt: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case key = "sku"
+        case name
+        case description
+        case createdAt
+        case updatedAt
+    }
 }
+
+extension Product: BreezeCodable { }
+
+BreezeLambdaAPI<Product>.main()
 ```
 ![](images/postman.png)
 
@@ -35,18 +54,16 @@ The API implements the following schema:
 
 More details of the API are described in [swagger.json](swagger.json).
 
-The file can be imported in popular tool such as PostMan.
+The file can be imported into popular tools such as PostMan.
 
 Be sure to update the `"host": "<BASE_URL>"` with the URL provided during the deployment.
-
-The full `swagger-doc.html` has been generated using `pretty-swag`
 
 ## Serverless architecture
 
 The architecture is based on the classical AWS Serverless stack: APIGateway, Lambda and DynamoDB.
-- `APIGateway`: acts as a `proxy` for the `Lambda` and exposes it to the internet.
-- `Lambda`: is the computational layer.
-- `DynamoDB`: is the AWS `NoSQL` database
+- `APIGateway` acts as a `proxy` for `Lambda` and exposes it to the internet.
+- `Lambda` is the computational layer.
+- `DynamoDB` is the AWS `NoSQL` database
 
 Advantages:
 - Pay per use
