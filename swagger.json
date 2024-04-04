@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "version": "2020-05-25T15:42:57Z",
-    "title": "dev-swift-sprinter-rest-api-swift",
+    "title": "dev-swift-serverless-rest-api-swift",
     "contact": {
       "name": "Andrea Scuderi",
-      "url": "https://github.com/swift-sprinter"
+      "url": "https://github.com/swift-serverless"
     },
     "license": {
       "name": "Apache 2.0"

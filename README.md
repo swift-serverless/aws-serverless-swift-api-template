@@ -6,7 +6,7 @@ This package demonstrates how to write a Scalable REST API with the Serverless s
 
 ## Product API based on Breeze
 
-The example shows how to build and deploy a Rest API based on a `Product` swift struct using [Breeze](https://github.com/swift-sprinter/Breeze.git)
+The example shows how to build and deploy a Rest API based on a `Product` swift struct using [Breeze](https://github.com/swift-serverless/Breeze.git)
 
 The following code is all you need to implement the engine of a Serverless Rest API in Swift.
 The Serverless Rest API implements a CRUD interface to store the `Product` in DynamoDB.
@@ -94,7 +94,7 @@ SDK: 4.3.2
 - Clone this repository. From the command line type:
 
 ```console
-git clone https://github.com/swift-sprinter/aws-serverless-swift-api-template.git
+git clone https://github.com/swift-serverless/aws-serverless-swift-api-template.git
 cd aws-serverless-swift-api-template
 ```
 - Ensure you can run `make`:
