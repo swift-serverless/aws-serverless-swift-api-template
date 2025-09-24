@@ -34,4 +34,4 @@ struct Product: Codable {
 
 extension Product: BreezeCodable { }
 
-BreezeLambdaAPI<Product>.main()
+try await BreezeLambdaAPI<Product>().run()

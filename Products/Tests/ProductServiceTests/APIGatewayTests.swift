@@ -33,8 +33,4 @@ final class APIGatewayTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-
-    static var allTests = [
-        ("testDecode", testDecode),
-    ]
 }
